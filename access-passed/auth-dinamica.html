@@ -90,17 +90,17 @@
     .input-container {
       display: flex;
       justify-content: center;
-      gap: 12px;
+      gap: 10px;
       padding: 0 20px;
       margin-bottom: 30px;
       flex-shrink: 0;
     }
 
     .pin-input {
-      width: 48px;
-      height: 48px;
+      width: 50px;
+      height: 50px;
       border: none;
-      border-bottom: 2px solid #e0e0e0;
+      border-bottom: 3px solid #d0d0d0;
       text-align: center;
       font-size: 32px;
       font-weight: 600;
@@ -182,6 +182,12 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 18px;
+    }
+
+    .key-btn.delete svg {
+      width: 100%;
+      height: auto;
     }
 
     .key-btn.delete:active {
@@ -352,7 +358,7 @@
         <button class="key-btn empty"></button>
         <button class="key-btn" data-value="0">0</button>
         <button class="key-btn delete" id="deleteBtn">
-          <svg width="33" height="30" viewBox="0 0 29 27" fill="none">
+          <svg viewBox="0 0 29 27" fill="none">
             <path fill-rule="evenodd" clip-rule="evenodd" d="M26.8068 0C27.9114 0 28.8068 0.895431 28.8068 2V24.727C28.8068 25.8316 27.9114 26.727 26.8068 26.727H15.4722C14.9712 26.727 14.4884 26.5389 14.1194 26.2001L4.15169 17.0462C1.99435 15.065 1.99435 11.662 4.15169 9.68082L14.1194 0.526929C14.4884 0.188043 14.9712 0 15.4722 0H26.8068Z" fill="white"></path>
             <path d="M16.3541 11.1945L21.3873 16.2277" stroke="#200020" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
             <path d="M21.2213 11.4275L16.3423 16.3065" stroke="#200020" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
