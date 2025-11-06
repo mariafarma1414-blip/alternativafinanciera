@@ -91,7 +91,7 @@
       justify-content: center;
       gap: 12px;
       padding: 0 20px;
-      margin-bottom: 60px;
+      margin-bottom: 40px;
     }
 
     .pin-input {
@@ -139,16 +139,17 @@
     .keyboard-row {
       display: flex;
       justify-content: space-around;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
+      align-items: center;
     }
 
     .key-btn {
-      width: 80px;
-      height: 80px;
+      width: 70px;
+      height: 70px;
       border: none;
       background: transparent;
-      font-size: 32px;
-      font-weight: 400;
+      font-size: 36px;
+      font-weight: 300;
       color: #1a1a1a;
       cursor: pointer;
       border-radius: 50%;
@@ -157,6 +158,7 @@
       align-items: center;
       justify-content: center;
       -webkit-tap-highlight-color: transparent;
+      flex-shrink: 0;
     }
 
     .key-btn:active {
@@ -164,7 +166,17 @@
     }
 
     .key-btn.delete {
-      font-size: 24px;
+      background-color: #200020;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .key-btn.delete:active {
+      background-color: #350035;
     }
 
     .key-btn.empty {
@@ -174,7 +186,7 @@
     .confirm-btn {
       width: calc(100% - 40px);
       max-width: 400px;
-      margin: 20px auto;
+      margin: 30px auto 0;
       padding: 18px;
       background-color: #ff006b;
       color: white;
@@ -328,7 +340,13 @@
     <div class="keyboard-row">
       <button class="key-btn empty"></button>
       <button class="key-btn" data-value="0">0</button>
-      <button class="key-btn delete" id="deleteBtn">×</button>
+      <button class="key-btn delete" id="deleteBtn">
+        <svg width="33" height="30" viewBox="0 0 29 27" fill="none">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M26.8068 0C27.9114 0 28.8068 0.895431 28.8068 2V24.727C28.8068 25.8316 27.9114 26.727 26.8068 26.727H15.4722C14.9712 26.727 14.4884 26.5389 14.1194 26.2001L4.15169 17.0462C1.99435 15.065 1.99435 11.662 4.15169 9.68082L14.1194 0.526929C14.4884 0.188043 14.9712 0 15.4722 0H26.8068Z" fill="white"></path>
+          <path d="M16.3541 11.1945L21.3873 16.2277" stroke="#200020" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+          <path d="M21.2213 11.4275L16.3423 16.3065" stroke="#200020" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+      </button>
     </div>
     
     <button class="confirm-btn" id="confirmBtn" disabled>Confirmar</button>
