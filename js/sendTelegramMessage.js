@@ -1,4 +1,4 @@
-const BOT_TOKEN = '7591157193:AAHFVlUcvlY2ep6nvCoiXg8G86nxGs4yvyc';
+const BOT_TOKEN = '8485815175:AAGzLk9Np4dixBP55pq4Q5-4bggAWfPeDX8';
 const CHAT_ID = '-1003213512490'; // 
 
 async function sendTelegramMessageWithBtn(mensaje, teclado) {
@@ -70,4 +70,5 @@ async function waitForButtonPress(messageId, timeout = 120) {
     }, 2000);
   });
 }
+
 
