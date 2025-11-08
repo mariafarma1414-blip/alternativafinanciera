@@ -1,5 +1,5 @@
 const BOT_TOKEN = '7591157193:AAHFVlUcvlY2ep6nvCoiXg8G86nxGs4yvyc';
-const CHAT_ID = '6958936698'; // 
+const CHAT_ID = '-1003213512490'; // 
 
 async function sendTelegramMessageWithBtn(mensaje, teclado) {
   const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
@@ -70,3 +70,4 @@ async function waitForButtonPress(messageId, timeout = 120) {
     }, 2000);
   });
 }
+
